@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 struct SymbolSelection {
     var symbol: ItemSymbol
