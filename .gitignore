@@ -35,3 +35,6 @@ Icon?
 
 # iCloud
 *.icloud
+
+# Personal data backups
+TestData/
