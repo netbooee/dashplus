@@ -7,6 +7,7 @@ struct QuickEntrySheet: View {
     @Query(sort: \DashList.prefix) private var lists: [DashList]
 
     @State private var selectedListID: UUID?
+    @State private var selectedSymbol: ItemSymbol = .dash
     @State private var text = ""
     @FocusState private var textFocused: Bool
 
@@ -31,7 +32,23 @@ struct QuickEntrySheet: View {
                         }
                     }
                     .padding(.horizontal, 16)
-                    .padding(.vertical, 14)
+                    .padding(.vertical, 10)
+                }
+                .background(Color(.secondarySystemBackground))
+
+                Divider()
+
+                // Symbol chips
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach(ItemSymbol.allCases, id: \.self) { symbol in
+                            SymbolChip(symbol: symbol, isSelected: selectedSymbol == symbol) {
+                                selectedSymbol = symbol
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
                 }
                 .background(Color(.secondarySystemBackground))
 
@@ -39,11 +56,12 @@ struct QuickEntrySheet: View {
 
                 // Entry row
                 HStack(alignment: .top, spacing: 12) {
-                    Image(systemName: "minus")
-                        .foregroundStyle(.secondary)
+                    Image(systemName: selectedSymbol.systemImageName)
+                        .foregroundStyle(selectedSymbol.color)
                         .font(.system(size: 16, weight: .semibold))
                         .frame(width: 24, height: 24)
                         .padding(.top, 3)
+                        .animation(.easeInOut(duration: 0.15), value: selectedSymbol)
 
                     TextField("What needs to be done?", text: $text, axis: .vertical)
                         .font(.system(.body, design: .monospaced))
@@ -82,12 +100,13 @@ struct QuickEntrySheet: View {
 
         let targetList = lists.first { $0.id == selectedListID } ?? findOrCreateGEN()
         let item = DashItem(
-            symbol: .dash,
+            symbol: selectedSymbol,
             categoryCode: targetList.prefix,
             text: trimmedText,
             sortOrder: targetList.itemList.count
         )
         item.list = targetList
+        if selectedSymbol == .leftArrow { item.delegatedAt = Date() }
         modelContext.insert(item)
         dismiss()
     }
@@ -97,6 +116,25 @@ struct QuickEntrySheet: View {
         let gen = DashList(name: "General", prefix: "GEN")
         modelContext.insert(gen)
         return gen
+    }
+}
+
+struct SymbolChip: View {
+    let symbol: ItemSymbol
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: symbol.systemImageName)
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundStyle(isSelected ? .white : symbol.color)
+                .frame(width: 38, height: 34)
+                .background(isSelected ? symbol.color : symbol.color.opacity(0.12))
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+        }
+        .buttonStyle(.plain)
+        .animation(.easeInOut(duration: 0.15), value: isSelected)
     }
 }
 
