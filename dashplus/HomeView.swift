@@ -23,10 +23,11 @@ struct HomeView: View {
     }
 
     private static let symbolGroups: [(title: String, symbols: [ItemSymbol])] = [
-        ("Todo List",              [.dash]),
-        ("Meetings Need Scheduling", [.square, .scheduledMeeting]),
-        ("Delegated",              [.leftArrow]),
-        ("Waiting For",            [.rightArrow]),
+        ("Todo List",                [.dash]),
+        ("Meetings Need Scheduling", [.square]),
+        ("Meetings Scheduled",       [.scheduledMeeting]),
+        ("Delegated",                [.leftArrow]),
+        ("Waiting For",              [.rightArrow]),
     ]
 
     // MARK: - Grouped data
