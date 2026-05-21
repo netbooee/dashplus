@@ -8,21 +8,57 @@ struct HomeView: View {
     @State private var showingQuickEntry = false
     @State private var collapsedSections: Set<Date> = []
 
-    private var groupedByDay: [(Date, [DashItem])] {
+    // MARK: - Symbol grouping definition (order matters)
+
+    private enum HomeRow: Identifiable {
+        case groupHeader(title: String, uid: String)
+        case dashItem(DashItem)
+
+        var id: String {
+            switch self {
+            case .groupHeader(_, let uid): return uid
+            case .dashItem(let item):      return item.id.uuidString
+            }
+        }
+    }
+
+    private static let symbolGroups: [(title: String, symbols: [ItemSymbol])] = [
+        ("Todo List",              [.dash]),
+        ("Meetings Need Scheduling", [.square, .scheduledMeeting]),
+        ("Delegated",              [.leftArrow]),
+        ("Waiting For",            [.rightArrow]),
+    ]
+
+    // MARK: - Grouped data
+
+    private var groupedByDay: [(date: Date, rows: [HomeRow])] {
         let calendar = Calendar.current
-        let active = allItems.filter { $0.symbol != .plus && $0.symbol != .triangle && $0.symbol != .person && $0.symbol != .someday }
-        let groups = Dictionary(grouping: active) { item in
+        let active = allItems.filter {
+            $0.symbol != .plus && $0.symbol != .triangle &&
+            $0.symbol != .person && $0.symbol != .someday
+        }
+        let byDay = Dictionary(grouping: active) { item in
             calendar.startOfDay(for: item.scheduledDate)
         }
-        return groups
+        return byDay
             .sorted { $0.key < $1.key }
             .map { date, items in
-                let sorted = items.sorted {
-                    ($0.list?.prefix ?? "") < ($1.list?.prefix ?? "")
+                var rows: [HomeRow] = []
+                for group in Self.symbolGroups {
+                    let filtered = items
+                        .filter { group.symbols.contains($0.symbol) }
+                        .sorted { ($0.list?.prefix ?? "") < ($1.list?.prefix ?? "") }
+                    guard !filtered.isEmpty else { continue }
+                    let uid = "\(date.timeIntervalSince1970)-\(group.title)"
+                    rows.append(.groupHeader(title: group.title, uid: uid))
+                    rows.append(contentsOf: filtered.map { .dashItem($0) })
                 }
-                return (date, sorted)
+                return (date, rows)
             }
+            .filter { !$0.rows.isEmpty }
     }
+
+    // MARK: - Date formatter
 
     private static let sectionFormatter: DateFormatter = {
         let f = DateFormatter()
@@ -31,50 +67,65 @@ struct HomeView: View {
         return f
     }()
 
+    // MARK: - Body
+
     var body: some View {
         NavigationStack {
             List {
-                ForEach(groupedByDay, id: \.0) { date, items in
+                ForEach(groupedByDay, id: \.date) { day in
                     Section {
-                        if !collapsedSections.contains(date) {
-                            ForEach(items) { item in
-                                DashItemRow(item: item)
-                                    .swipeActions(edge: .leading, allowsFullSwipe: false) {
-                                        if item.symbol != .plus {
-                                            Button { rollToTomorrow(item) } label: {
-                                                Label("Tomorrow", systemImage: "sunrise")
-                                            }
-                                            .tint(.orange)
+                        if !collapsedSections.contains(day.date) {
+                            ForEach(day.rows) { row in
+                                switch row {
+                                case .groupHeader(let title, _):
+                                    Text(title)
+                                        .font(.caption.weight(.semibold))
+                                        .foregroundStyle(.secondary)
+                                        .textCase(.uppercase)
+                                        .listRowSeparator(.hidden)
+                                        .listRowInsets(EdgeInsets(top: 10, leading: 16, bottom: 2, trailing: 16))
+                                        .listRowBackground(Color.clear)
 
-                                            Button { moveToToday(item) } label: {
-                                                Label("Today", systemImage: "arrow.uturn.left.circle")
+                                case .dashItem(let item):
+                                    DashItemRow(item: item)
+                                        .swipeActions(edge: .leading, allowsFullSwipe: false) {
+                                            if item.symbol != .plus {
+                                                Button { rollToTomorrow(item) } label: {
+                                                    Label("Tomorrow", systemImage: "sunrise")
+                                                }
+                                                .tint(.orange)
+
+                                                Button { moveToToday(item) } label: {
+                                                    Label("Today", systemImage: "arrow.uturn.left.circle")
+                                                }
+                                                .tint(.blue)
                                             }
-                                            .tint(.blue)
                                         }
-                                    }
+                                }
                             }
                         }
                     } header: {
                         Button {
                             withAnimation(.easeInOut(duration: 0.2)) {
-                                if collapsedSections.contains(date) {
-                                    collapsedSections.remove(date)
+                                if collapsedSections.contains(day.date) {
+                                    collapsedSections.remove(day.date)
                                 } else {
-                                    collapsedSections.insert(date)
+                                    collapsedSections.insert(day.date)
                                 }
                             }
                         } label: {
                             HStack(spacing: 6) {
-                                Image(systemName: collapsedSections.contains(date) ? "chevron.right" : "chevron.down")
+                                Image(systemName: collapsedSections.contains(day.date) ? "chevron.right" : "chevron.down")
                                     .font(.system(size: 11, weight: .semibold))
                                     .foregroundStyle(.secondary)
-                                Text(Self.sectionFormatter.string(from: date))
+                                Text(Self.sectionFormatter.string(from: day.date))
                                     .font(.subheadline.weight(.semibold))
                                     .foregroundStyle(.primary)
                                     .textCase(nil)
                                 Spacer()
-                                if collapsedSections.contains(date) {
-                                    Text("\(items.count)")
+                                let itemCount = day.rows.filter { if case .dashItem = $0 { return true }; return false }.count
+                                if collapsedSections.contains(day.date) {
+                                    Text("\(itemCount)")
                                         .font(.caption.weight(.medium))
                                         .foregroundStyle(.secondary)
                                         .monospacedDigit()
@@ -117,6 +168,8 @@ struct HomeView: View {
             }
         }
     }
+
+    // MARK: - Actions
 
     private func rollToTomorrow(_ item: DashItem) {
         let cal = Calendar.current
