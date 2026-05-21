@@ -4,6 +4,7 @@ struct DashItemRow: View {
     @Bindable var item: DashItem
     var isCompact: Bool = false
     var showPrefix: Bool = true
+    var isOverdue: Bool = false
     @Environment(\.editMode) private var editMode
     @State private var showingSymbolPicker = false
     @State private var isEditing = false
@@ -50,7 +51,10 @@ struct DashItemRow: View {
                             ? .system(.caption, design: .monospaced)
                             : .system(.subheadline, design: .monospaced))
                         .fixedSize(horizontal: false, vertical: true)
-                        .foregroundStyle(item.symbol == .plus ? Color.secondary : Color.primary)
+                        .foregroundStyle(
+                            item.symbol == .plus ? Color.secondary :
+                            isOverdue             ? Color.red       : Color.primary
+                        )
                         .onTapGesture {
                             guard editMode?.wrappedValue != .active else { return }
                             editText = item.text

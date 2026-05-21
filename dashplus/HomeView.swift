@@ -8,19 +8,21 @@ struct HomeView: View {
     @State private var showingQuickEntry = false
     @State private var collapsedSections: Set<Date> = []
 
-    // MARK: - Symbol grouping definition (order matters)
+    // MARK: - Row model
 
     private enum HomeRow: Identifiable {
         case groupHeader(title: String, uid: String)
-        case dashItem(DashItem)
+        case dashItem(DashItem, isOverdue: Bool)
 
         var id: String {
             switch self {
             case .groupHeader(_, let uid): return uid
-            case .dashItem(let item):      return item.id.uuidString
+            case .dashItem(let item, _):  return item.id.uuidString
             }
         }
     }
+
+    // MARK: - Symbol group order
 
     private static let symbolGroups: [(title: String, symbols: [ItemSymbol])] = [
         ("Todo List",                [.dash]),
@@ -32,36 +34,56 @@ struct HomeView: View {
 
     // MARK: - Grouped data
 
+    private var todayStart: Date {
+        Calendar.current.startOfDay(for: Date())
+    }
+
+    /// Today section always first (even when empty), then future dates.
     private var groupedByDay: [(date: Date, rows: [HomeRow])] {
         let calendar = Calendar.current
+        let today = todayStart
+
         let active = allItems.filter {
             $0.symbol != .plus && $0.symbol != .triangle &&
             $0.symbol != .person && $0.symbol != .someday
         }
-        let byDay = Dictionary(grouping: active) { item in
-            calendar.startOfDay(for: item.scheduledDate)
-        }
-        return byDay
+
+        // Today bucket: everything scheduled today or earlier (overdue)
+        let todayItems = active.filter { calendar.startOfDay(for: $0.scheduledDate) <= today }
+        let todayRows  = makeRows(from: todayItems, todayStart: today)
+
+        // Future buckets: one section per future date
+        let futureItems = active.filter { calendar.startOfDay(for: $0.scheduledDate) > today }
+        let byDay = Dictionary(grouping: futureItems) { calendar.startOfDay(for: $0.scheduledDate) }
+        let futureSections = byDay
             .sorted { $0.key < $1.key }
-            .map { date, items in
-                var rows: [HomeRow] = []
-                for group in Self.symbolGroups {
-                    let filtered = items
-                        .filter { group.symbols.contains($0.symbol) }
-                        .sorted { ($0.list?.prefix ?? "") < ($1.list?.prefix ?? "") }
-                    guard !filtered.isEmpty else { continue }
-                    let uid = "\(date.timeIntervalSince1970)-\(group.title)"
-                    rows.append(.groupHeader(title: group.title, uid: uid))
-                    rows.append(contentsOf: filtered.map { .dashItem($0) })
-                }
-                return (date, rows)
-            }
-            .filter { !$0.rows.isEmpty }
+            .map { date, items in (date: date, rows: makeRows(from: items, todayStart: today)) }
+
+        return [(date: today, rows: todayRows)] + futureSections
     }
 
-    // MARK: - Date formatter
+    private func makeRows(from items: [DashItem], todayStart: Date) -> [HomeRow] {
+        let calendar = Calendar.current
+        var rows: [HomeRow] = []
+        for group in Self.symbolGroups {
+            let filtered = items
+                .filter { group.symbols.contains($0.symbol) }
+                .sorted { ($0.list?.prefix ?? "") < ($1.list?.prefix ?? "") }
+            guard !filtered.isEmpty else { continue }
+            // uid only needs to be unique within the whole list
+            let uid = "\(filtered.first!.id)-\(group.title)"
+            rows.append(.groupHeader(title: group.title, uid: uid))
+            for item in filtered {
+                let overdue = calendar.startOfDay(for: item.scheduledDate) < todayStart
+                rows.append(.dashItem(item, isOverdue: overdue))
+            }
+        }
+        return rows
+    }
 
-    private static let sectionFormatter: DateFormatter = {
+    // MARK: - Formatters
+
+    private static let dateFormatter: DateFormatter = {
         let f = DateFormatter()
         f.dateStyle = .full
         f.timeStyle = .none
@@ -74,33 +96,28 @@ struct HomeView: View {
         NavigationStack {
             List {
                 ForEach(groupedByDay, id: \.date) { day in
+                    let isToday = day.date == todayStart
                     Section {
                         if !collapsedSections.contains(day.date) {
-                            ForEach(day.rows) { row in
-                                switch row {
-                                case .groupHeader(let title, _):
-                                    Text(title)
-                                        .font(.caption.weight(.semibold))
-                                        .foregroundStyle(.secondary)
-                                        .textCase(.uppercase)
-                                        .listRowSeparator(.hidden)
-                                        .listRowInsets(EdgeInsets(top: 10, leading: 16, bottom: 2, trailing: 16))
+                            if day.rows.isEmpty {
+                                Text("No items for today")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.tertiary)
+                                    .listRowInsets(EdgeInsets(top: 10, leading: 16, bottom: 10, trailing: 16))
+                            } else {
+                                ForEach(day.rows) { row in
+                                    switch row {
+                                    case .groupHeader(let title, _):
+                                        Text(title)
+                                            .font(.caption.weight(.semibold))
+                                            .foregroundStyle(.secondary)
+                                            .textCase(.uppercase)
+                                            .listRowSeparator(.hidden)
+                                            .listRowInsets(EdgeInsets(top: 10, leading: 16, bottom: 2, trailing: 16))
 
-                                case .dashItem(let item):
-                                    DashItemRow(item: item)
-                                        .swipeActions(edge: .leading, allowsFullSwipe: false) {
-                                            if item.symbol != .plus {
-                                                Button { rollToTomorrow(item) } label: {
-                                                    Label("Tomorrow", systemImage: "sunrise")
-                                                }
-                                                .tint(.orange)
-
-                                                Button { moveToToday(item) } label: {
-                                                    Label("Today", systemImage: "arrow.uturn.left.circle")
-                                                }
-                                                .tint(.blue)
-                                            }
-                                        }
+                                    case .dashItem(let item, let isOverdue):
+                                        DashItemRow(item: item, isOverdue: isOverdue)
+                                    }
                                 }
                             }
                         }
@@ -118,13 +135,19 @@ struct HomeView: View {
                                 Image(systemName: collapsedSections.contains(day.date) ? "chevron.right" : "chevron.down")
                                     .font(.system(size: 11, weight: .semibold))
                                     .foregroundStyle(.secondary)
-                                Text(Self.sectionFormatter.string(from: day.date))
+
+                                Text(isToday ? "Today" : Self.dateFormatter.string(from: day.date))
                                     .font(.subheadline.weight(.semibold))
-                                    .foregroundStyle(.primary)
+                                    .foregroundStyle(isToday ? .blue : .primary)
                                     .textCase(nil)
+
                                 Spacer()
-                                let itemCount = day.rows.filter { if case .dashItem = $0 { return true }; return false }.count
+
                                 if collapsedSections.contains(day.date) {
+                                    let itemCount = day.rows.filter {
+                                        if case .dashItem = $0 { return true }
+                                        return false
+                                    }.count
                                     Text("\(itemCount)")
                                         .font(.caption.weight(.medium))
                                         .foregroundStyle(.secondary)
@@ -151,15 +174,6 @@ struct HomeView: View {
                 }
                 .padding(20)
             }
-            .overlay {
-                if groupedByDay.isEmpty {
-                    ContentUnavailableView(
-                        "No Items",
-                        systemImage: "list.bullet",
-                        description: Text("Tap + to add your first item")
-                    )
-                }
-            }
             .sheet(isPresented: $showingQuickEntry) {
                 QuickEntrySheet()
             }
@@ -169,17 +183,7 @@ struct HomeView: View {
         }
     }
 
-    // MARK: - Actions
-
-    private func rollToTomorrow(_ item: DashItem) {
-        let cal = Calendar.current
-        let base = cal.startOfDay(for: item.scheduledDate)
-        item.scheduledDate = cal.date(byAdding: .day, value: 1, to: base) ?? item.scheduledDate
-    }
-
-    private func moveToToday(_ item: DashItem) {
-        item.scheduledDate = Calendar.current.startOfDay(for: Date())
-    }
+    // MARK: - Helpers
 
     private func ensureGENExists() {
         guard !lists.contains(where: { $0.prefix == "GEN" }) else { return }
