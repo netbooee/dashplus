@@ -9,15 +9,22 @@ struct DashListView: View {
     @State private var showingImporter = false
     @State private var importError: String?
     @State private var completedCollapsed = false
+    @State private var somedayCollapsed = false
 
     private var activeItems: [DashItem] {
         list.itemList
-            .filter { $0.symbol != .plus }
+            .filter { $0.symbol != .plus && $0.symbol != .someday }
             .sorted {
                 $0.sortOrder == $1.sortOrder
                     ? $0.createdAt < $1.createdAt
                     : $0.sortOrder < $1.sortOrder
             }
+    }
+
+    private var somedayItems: [DashItem] {
+        list.itemList
+            .filter { $0.symbol == .someday }
+            .sorted { $0.createdAt < $1.createdAt }
     }
 
     private var completedItems: [DashItem] {
@@ -33,6 +40,27 @@ struct DashListView: View {
             }
             .onDelete(perform: deleteActive)
             .onMove(perform: moveItems)
+
+            if !somedayItems.isEmpty {
+                CompletedArchiveDivider(
+                    title: "Someday / Maybe",
+                    isCollapsed: somedayCollapsed,
+                    count: somedayItems.count
+                ) {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        somedayCollapsed.toggle()
+                    }
+                }
+                .listRowSeparator(.hidden)
+                .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+
+                if !somedayCollapsed {
+                    ForEach(somedayItems) { item in
+                        DashItemRow(item: item, isCompact: true, showPrefix: false)
+                    }
+                    .onDelete(perform: deleteSomeday)
+                }
+            }
 
             if !completedItems.isEmpty {
                 CompletedArchiveDivider(
@@ -116,6 +144,10 @@ struct DashListView: View {
 
     private func deleteActive(at offsets: IndexSet) {
         for index in offsets { modelContext.delete(activeItems[index]) }
+    }
+
+    private func deleteSomeday(at offsets: IndexSet) {
+        for index in offsets { modelContext.delete(somedayItems[index]) }
     }
 
     private func deleteCompleted(at offsets: IndexSet) {

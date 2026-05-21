@@ -8,6 +8,7 @@ struct ListsView: View {
     @State private var editingList: DashList?
     @State private var expandedLists: Set<UUID> = []
     @State private var completedCollapsed: Set<UUID> = []
+    @State private var somedayCollapsed: Set<UUID> = []
     @State private var showingImporter = false
     @State private var importError: String?
 
@@ -18,18 +19,45 @@ struct ListsView: View {
                     Section {
                         if expandedLists.contains(list.id) {
                             let active = list.itemList
-                                .filter { $0.symbol != .plus }
+                                .filter { $0.symbol != .plus && $0.symbol != .someday }
                                 .sorted {
                                     $0.sortOrder == $1.sortOrder
                                         ? $0.createdAt < $1.createdAt
                                         : $0.sortOrder < $1.sortOrder
                                 }
+                            let someday = list.itemList
+                                .filter { $0.symbol == .someday }
+                                .sorted { $0.createdAt < $1.createdAt }
                             let completed = list.itemList
                                 .filter { $0.symbol == .plus }
                                 .sorted { $0.createdAt < $1.createdAt }
 
                             ForEach(active) { item in
                                 DashItemRow(item: item, showPrefix: false)
+                            }
+
+                            if !someday.isEmpty {
+                                CompletedArchiveDivider(
+                                    title: "Someday / Maybe",
+                                    isCollapsed: somedayCollapsed.contains(list.id),
+                                    count: someday.count
+                                ) {
+                                    withAnimation(.easeInOut(duration: 0.2)) {
+                                        if somedayCollapsed.contains(list.id) {
+                                            somedayCollapsed.remove(list.id)
+                                        } else {
+                                            somedayCollapsed.insert(list.id)
+                                        }
+                                    }
+                                }
+                                .listRowSeparator(.hidden)
+                                .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+
+                                if !somedayCollapsed.contains(list.id) {
+                                    ForEach(someday) { item in
+                                        DashItemRow(item: item, isCompact: true, showPrefix: false)
+                                    }
+                                }
                             }
 
                             if !completed.isEmpty {

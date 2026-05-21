@@ -111,7 +111,8 @@ struct DashPlusExporter {
             ("<",   .leftArrow),
             ("^",   .triangle),
             ("o",   .circle),
-            ("P",   .person)
+            ("P",   .person),
+            ("~",   .someday)
         ]
 
         for raw in text.components(separatedBy: .newlines) {

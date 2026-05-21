@@ -10,7 +10,7 @@ struct HomeView: View {
 
     private var groupedByDay: [(Date, [DashItem])] {
         let calendar = Calendar.current
-        let active = allItems.filter { $0.symbol != .plus && $0.symbol != .triangle && $0.symbol != .person }
+        let active = allItems.filter { $0.symbol != .plus && $0.symbol != .triangle && $0.symbol != .person && $0.symbol != .someday }
         let groups = Dictionary(grouping: active) { item in
             calendar.startOfDay(for: item.scheduledDate)
         }

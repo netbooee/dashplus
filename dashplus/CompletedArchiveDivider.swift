@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct CompletedArchiveDivider: View {
+    var title: String = "Completed"
     let isCollapsed: Bool
     let count: Int
     let onTap: () -> Void
@@ -14,7 +15,7 @@ struct CompletedArchiveDivider: View {
                 HStack(spacing: 4) {
                     Image(systemName: isCollapsed ? "chevron.right" : "chevron.down")
                         .font(.system(size: 9, weight: .semibold))
-                    Text(isCollapsed ? "Completed (\(count))" : "Completed")
+                    Text(isCollapsed ? "\(title) (\(count))" : title)
                         .font(.caption2.weight(.medium))
                 }
                 .foregroundStyle(.secondary)

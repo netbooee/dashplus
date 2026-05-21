@@ -10,6 +10,7 @@ enum ItemSymbol: String, CaseIterable, Codable {
     case square
     case scheduledMeeting
     case person
+    case someday
 
     var systemImageName: String {
         switch self {
@@ -22,6 +23,7 @@ enum ItemSymbol: String, CaseIterable, Codable {
         case .square:           return "square"
         case .scheduledMeeting: return "calendar.badge.plus"
         case .person:           return "person"
+        case .someday:          return "moon.stars"
         }
     }
 
@@ -36,6 +38,7 @@ enum ItemSymbol: String, CaseIterable, Codable {
         case .square:           return .red
         case .scheduledMeeting: return .teal
         case .person:           return .cyan
+        case .someday:          return .indigo
         }
     }
 
@@ -50,6 +53,7 @@ enum ItemSymbol: String, CaseIterable, Codable {
         case .square:           return "[]"
         case .scheduledMeeting: return "[+]"
         case .person:           return "P"
+        case .someday:          return "~"
         }
     }
 
@@ -64,6 +68,7 @@ enum ItemSymbol: String, CaseIterable, Codable {
         case "[]":  return .square
         case "[+]": return .scheduledMeeting
         case "P":   return .person
+        case "~":   return .someday
         default:    return nil
         }
     }
@@ -79,6 +84,7 @@ enum ItemSymbol: String, CaseIterable, Codable {
         case .square:           return "Schedule Meeting"
         case .scheduledMeeting: return "Meeting Scheduled"
         case .person:           return "New Contact"
+        case .someday:          return "Someday / Maybe"
         }
     }
 }
