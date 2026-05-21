@@ -1,0 +1,410 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		DA580001000000000000004A /* DashPlusApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA580001000000000000002B /* DashPlusApp.swift */; };
+		DA580001000000000000004B /* ItemSymbol.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA580001000000000000002C /* ItemSymbol.swift */; };
+		DA580001000000000000004C /* DashList.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA580001000000000000002D /* DashList.swift */; };
+		DA580001000000000000004D /* DashItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA580001000000000000002E /* DashItem.swift */; };
+		DA580001000000000000004E /* ListsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA580001000000000000002F /* ListsView.swift */; };
+		DA580001000000000000004F /* DashListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA580001000000000000003A /* DashListView.swift */; };
+		DA580001000000000000005A /* DashItemRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA580001000000000000003B /* DashItemRow.swift */; };
+		DA580001000000000000005B /* AddItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA580001000000000000003C /* AddItemView.swift */; };
+		DA580001000000000000005C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DA580001000000000000003D /* Assets.xcassets */; };
+		DA580001000000000000005D /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DA580001000000000000003E /* Preview Assets.xcassets */; };
+		DA580001000000000000006B /* SymbolPickerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA580001000000000000006A /* SymbolPickerSheet.swift */; };
+		DA580001000000000000007B /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA580001000000000000007A /* ContentView.swift */; };
+		DA580001000000000000007D /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA580001000000000000007C /* HomeView.swift */; };
+		DA580001000000000000007F /* ListEditSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA580001000000000000007E /* ListEditSheet.swift */; };
+		DA580001000000000000008B /* QuickEntrySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA580001000000000000008A /* QuickEntrySheet.swift */; };
+		DA580001000000000000009B /* PeopleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA580001000000000000009A /* PeopleView.swift */; };
+		DA5800010000000000000AAB /* InlineAddItemRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5800010000000000000AAA /* InlineAddItemRow.swift */; };
+		DA5800010000000000000BBB /* NotesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5800010000000000000BBa /* NotesView.swift */; };
+		DA5800010000000000000CCB /* DashPlusExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5800010000000000000CCA /* DashPlusExporter.swift */; };
+		DA5800010000000000000DDB /* CompletedArchiveDivider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5800010000000000000DDA /* CompletedArchiveDivider.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		DA580001000000000000002B /* DashPlusApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashPlusApp.swift; sourceTree = "<group>"; };
+		DA580001000000000000002C /* ItemSymbol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemSymbol.swift; sourceTree = "<group>"; };
+		DA580001000000000000002D /* DashList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashList.swift; sourceTree = "<group>"; };
+		DA580001000000000000002E /* DashItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashItem.swift; sourceTree = "<group>"; };
+		DA580001000000000000002F /* ListsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListsView.swift; sourceTree = "<group>"; };
+		DA580001000000000000003A /* DashListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashListView.swift; sourceTree = "<group>"; };
+		DA580001000000000000003B /* DashItemRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashItemRow.swift; sourceTree = "<group>"; };
+		DA580001000000000000003C /* AddItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddItemView.swift; sourceTree = "<group>"; };
+		DA580001000000000000003D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		DA580001000000000000003E /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		DA580001000000000000003F /* dashplus.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = dashplus.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DA580001000000000000005F /* dashplus.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = dashplus.entitlements; sourceTree = "<group>"; };
+		DA580001000000000000006A /* SymbolPickerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymbolPickerSheet.swift; sourceTree = "<group>"; };
+		DA580001000000000000007A /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		DA580001000000000000007C /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		DA580001000000000000007E /* ListEditSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListEditSheet.swift; sourceTree = "<group>"; };
+		DA580001000000000000008A /* QuickEntrySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickEntrySheet.swift; sourceTree = "<group>"; };
+		DA580001000000000000009A /* PeopleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeopleView.swift; sourceTree = "<group>"; };
+		DA5800010000000000000AAA /* InlineAddItemRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InlineAddItemRow.swift; sourceTree = "<group>"; };
+		DA5800010000000000000BBa /* NotesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotesView.swift; sourceTree = "<group>"; };
+		DA5800010000000000000CCA /* DashPlusExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashPlusExporter.swift; sourceTree = "<group>"; };
+		DA5800010000000000000DDA /* CompletedArchiveDivider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompletedArchiveDivider.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		DA580001000000000000002A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		DA580001000000000000001C /* dashplus */ = {
+			isa = PBXGroup;
+			children = (
+				DA580001000000000000002B /* DashPlusApp.swift */,
+				DA580001000000000000002C /* ItemSymbol.swift */,
+				DA580001000000000000002D /* DashList.swift */,
+				DA580001000000000000002E /* DashItem.swift */,
+				DA580001000000000000002F /* ListsView.swift */,
+				DA580001000000000000003A /* DashListView.swift */,
+				DA580001000000000000003B /* DashItemRow.swift */,
+				DA580001000000000000006A /* SymbolPickerSheet.swift */,
+				DA580001000000000000003C /* AddItemView.swift */,
+				DA580001000000000000007A /* ContentView.swift */,
+				DA580001000000000000007C /* HomeView.swift */,
+				DA580001000000000000007E /* ListEditSheet.swift */,
+				DA580001000000000000008A /* QuickEntrySheet.swift */,
+				DA580001000000000000009A /* PeopleView.swift */,
+				DA5800010000000000000AAA /* InlineAddItemRow.swift */,
+				DA5800010000000000000BBa /* NotesView.swift */,
+				DA5800010000000000000CCA /* DashPlusExporter.swift */,
+				DA5800010000000000000DDA /* CompletedArchiveDivider.swift */,
+				DA580001000000000000003D /* Assets.xcassets */,
+				DA580001000000000000005E /* Preview Content */,
+				DA580001000000000000005F /* dashplus.entitlements */,
+			);
+			path = dashplus;
+			sourceTree = "<group>";
+		};
+		DA580001000000000000001D /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				DA580001000000000000003F /* dashplus.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		DA580001000000000000005E /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				DA580001000000000000003E /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		DA5800010000000000000060 = {
+			isa = PBXGroup;
+			children = (
+				DA580001000000000000001C /* dashplus */,
+				DA580001000000000000001D /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		DA580001000000000000000B /* dashplus */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DA580001000000000000000D /* Build configuration list for PBXNativeTarget "dashplus" */;
+			buildPhases = (
+				DA580001000000000000001E /* Sources */,
+				DA580001000000000000001F /* Resources */,
+				DA580001000000000000002A /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = dashplus;
+			productName = dashplus;
+			productReference = DA580001000000000000003F /* dashplus.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		DA580001000000000000000A /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					DA580001000000000000000B = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = DA580001000000000000000C /* Build configuration list for PBXProject "dashplus" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = DA5800010000000000000060;
+			productRefGroup = DA580001000000000000001D /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				DA580001000000000000000B /* dashplus */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		DA580001000000000000001F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DA580001000000000000005C /* Assets.xcassets in Resources */,
+				DA580001000000000000005D /* Preview Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		DA580001000000000000001E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DA580001000000000000004A /* DashPlusApp.swift in Sources */,
+				DA580001000000000000004B /* ItemSymbol.swift in Sources */,
+				DA580001000000000000004C /* DashList.swift in Sources */,
+				DA580001000000000000004D /* DashItem.swift in Sources */,
+				DA580001000000000000004E /* ListsView.swift in Sources */,
+				DA580001000000000000004F /* DashListView.swift in Sources */,
+				DA580001000000000000005A /* DashItemRow.swift in Sources */,
+				DA580001000000000000006B /* SymbolPickerSheet.swift in Sources */,
+				DA580001000000000000005B /* AddItemView.swift in Sources */,
+				DA580001000000000000007B /* ContentView.swift in Sources */,
+				DA580001000000000000007D /* HomeView.swift in Sources */,
+				DA580001000000000000007F /* ListEditSheet.swift in Sources */,
+				DA580001000000000000008B /* QuickEntrySheet.swift in Sources */,
+				DA580001000000000000009B /* PeopleView.swift in Sources */,
+				DA5800010000000000000AAB /* InlineAddItemRow.swift in Sources */,
+				DA5800010000000000000BBB /* NotesView.swift in Sources */,
+				DA5800010000000000000CCB /* DashPlusExporter.swift in Sources */,
+				DA5800010000000000000DDB /* CompletedArchiveDivider.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		DA580001000000000000000E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		DA580001000000000000000F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		DA580001000000000000001A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = dashplus/dashplus.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = GB8H6683BF;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Dash Plus";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tonymartinez.dashplus;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		DA580001000000000000001B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = dashplus/dashplus.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = GB8H6683BF;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Dash Plus";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tonymartinez.dashplus;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		DA580001000000000000000C /* Build configuration list for PBXProject "dashplus" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DA580001000000000000000E /* Debug */,
+				DA580001000000000000000F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DA580001000000000000000D /* Build configuration list for PBXNativeTarget "dashplus" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DA580001000000000000001A /* Debug */,
+				DA580001000000000000001B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = DA580001000000000000000A /* Project object */;
+}
