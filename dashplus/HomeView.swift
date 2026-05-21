@@ -84,7 +84,6 @@ struct HomeView: View {
                                         .textCase(.uppercase)
                                         .listRowSeparator(.hidden)
                                         .listRowInsets(EdgeInsets(top: 10, leading: 16, bottom: 2, trailing: 16))
-                                        .listRowBackground(Color.clear)
 
                                 case .dashItem(let item):
                                     DashItemRow(item: item)
