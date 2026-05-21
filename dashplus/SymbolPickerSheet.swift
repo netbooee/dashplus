@@ -22,14 +22,24 @@ struct SymbolSelection {
 struct SymbolPickerSheet: View {
     @Environment(\.dismiss) private var dismiss
     let onConfirm: (SymbolSelection) -> Void
+    let onMoveToList: ((DashList) -> Void)?
+    let currentListID: UUID?
 
     @State private var selection: SymbolSelection
+    @State private var showingListPicker = false
     @FocusState private var extraFieldFocused: Bool
 
     private let columns = [GridItem(.adaptive(minimum: 80), spacing: 12)]
 
-    init(current: SymbolSelection, onConfirm: @escaping (SymbolSelection) -> Void) {
+    init(
+        current: SymbolSelection,
+        currentListID: UUID? = nil,
+        onMoveToList: ((DashList) -> Void)? = nil,
+        onConfirm: @escaping (SymbolSelection) -> Void
+    ) {
         _selection = State(initialValue: current)
+        self.currentListID = currentListID
+        self.onMoveToList = onMoveToList
         self.onConfirm = onConfirm
     }
 
@@ -46,7 +56,9 @@ struct SymbolPickerSheet: View {
                     LazyVGrid(columns: columns, spacing: 12) {
                         ForEach(ItemSymbol.allCases, id: \.self) { symbol in
                             Button {
-                                if needsFollowOn(symbol) {
+                                if symbol == .circle && onMoveToList != nil {
+                                    showingListPicker = true
+                                } else if needsFollowOn(symbol) {
                                     selection.symbol = symbol
                                 } else {
                                     var result = selection
@@ -132,6 +144,12 @@ struct SymbolPickerSheet: View {
                     }
                 }
             }
+            .navigationDestination(isPresented: $showingListPicker) {
+                MoveToListView(currentListID: currentListID) { list in
+                    onMoveToList?(list)
+                    dismiss()
+                }
+            }
         }
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)
@@ -151,5 +169,44 @@ struct SymbolPickerSheet: View {
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .padding(.horizontal)
         .onAppear { extraFieldFocused = true }
+    }
+}
+
+struct MoveToListView: View {
+    @Query(sort: \DashList.prefix) private var lists: [DashList]
+    let currentListID: UUID?
+    let onSelect: (DashList) -> Void
+
+    private var availableLists: [DashList] {
+        lists.filter { $0.id != currentListID }
+    }
+
+    var body: some View {
+        List {
+            ForEach(availableLists) { list in
+                Button {
+                    onSelect(list)
+                } label: {
+                    HStack(spacing: 10) {
+                        if !list.prefix.isEmpty {
+                            Text(list.prefix)
+                                .font(.system(.caption, design: .monospaced, weight: .bold))
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(.secondary.opacity(0.12))
+                                .clipShape(RoundedRectangle(cornerRadius: 4))
+                        }
+                        Text(list.name)
+                        Spacer()
+                        Image(systemName: "arrow.right")
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+                    }
+                }
+                .foregroundStyle(.primary)
+            }
+        }
+        .navigationTitle("Move to List")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }

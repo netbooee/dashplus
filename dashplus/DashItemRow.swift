@@ -78,7 +78,11 @@ struct DashItemRow: View {
                     assignedTo: item.assignedTo,
                     waitingFor: item.waitingFor,
                     scheduledDate: item.scheduledDate
-                )
+                ),
+                currentListID: item.list?.id,
+                onMoveToList: { list in
+                    item.list = list
+                }
             ) { result in
                 let wasLeftArrow = item.symbol == .leftArrow
                 item.symbol = result.symbol
