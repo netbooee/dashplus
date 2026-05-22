@@ -29,6 +29,7 @@
 		DA5800010000000000000DDB /* CompletedArchiveDivider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5800010000000000000DDA /* CompletedArchiveDivider.swift */; };
 		DA5800010000000000000EEA /* PrefixChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5800010000000000000EE9 /* PrefixChip.swift */; };
 		DA5800010000000000000FFB /* KPIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5800010000000000000FFA /* KPIView.swift */; };
+		DA580001000000000000100B /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA580001000000000000100A /* OnboardingView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -56,6 +57,7 @@
 		DA5800010000000000000DDA /* CompletedArchiveDivider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompletedArchiveDivider.swift; sourceTree = "<group>"; };
 		DA5800010000000000000EE9 /* PrefixChip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrefixChip.swift; sourceTree = "<group>"; };
 		DA5800010000000000000FFA /* KPIView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KPIView.swift; sourceTree = "<group>"; };
+		DA580001000000000000100A /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -92,6 +94,7 @@
 				DA5800010000000000000DDA /* CompletedArchiveDivider.swift */,
 				DA5800010000000000000EE9 /* PrefixChip.swift */,
 				DA5800010000000000000FFA /* KPIView.swift */,
+				DA580001000000000000100A /* OnboardingView.swift */,
 				DA580001000000000000003D /* Assets.xcassets */,
 				DA580001000000000000005E /* Preview Content */,
 				DA580001000000000000005F /* dashplus.entitlements */,
@@ -213,6 +216,7 @@
 				DA5800010000000000000DDB /* CompletedArchiveDivider.swift in Sources */,
 				DA5800010000000000000EEA /* PrefixChip.swift in Sources */,
 				DA5800010000000000000FFB /* KPIView.swift in Sources */,
+				DA580001000000000000100B /* OnboardingView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

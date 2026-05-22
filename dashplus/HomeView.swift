@@ -173,7 +173,7 @@ struct HomeView: View {
             .listStyle(.insetGrouped)
             .scrollContentBackground(.hidden)
             .background(Color.warmBg)
-            .navigationTitle("All Items")
+            .navigationTitle("ResiDo")
             .navigationBarTitleDisplayMode(.large)
             .overlay(alignment: .bottomTrailing) {
                 Button { showingQuickEntry = true } label: {

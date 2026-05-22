@@ -1,10 +1,12 @@
 import SwiftUI
 
 struct ContentView: View {
+    @AppStorage("resido.hasSeenOnboarding") private var hasSeenOnboarding = false
+
     var body: some View {
         TabView {
             HomeView()
-                .tabItem { Label("All Items", systemImage: "list.bullet") }
+                .tabItem { Label("ResiDo", systemImage: "list.bullet") }
             ListsView()
                 .tabItem { Label("Projects", systemImage: "folder") }
             KPIView()
@@ -13,6 +15,9 @@ struct ContentView: View {
                 .tabItem { Label("People", systemImage: "person.2") }
             NotesView()
                 .tabItem { Label("Notes", systemImage: "triangle") }
+        }
+        .fullScreenCover(isPresented: .constant(!hasSeenOnboarding)) {
+            OnboardingView { hasSeenOnboarding = true }
         }
     }
 }
