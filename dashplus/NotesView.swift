@@ -54,6 +54,8 @@ struct NotesView: View {
                 }
             }
             .listStyle(.insetGrouped)
+            .scrollContentBackground(.hidden)
+            .background(Color.warmBg)
             .navigationTitle("Notes")
             .overlay {
                 if noteItems.isEmpty {

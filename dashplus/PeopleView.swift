@@ -38,7 +38,7 @@ struct PeopleView: View {
                     } header: {
                         HStack(spacing: 6) {
                             Image(systemName: "person.circle.fill")
-                                .foregroundStyle(.blue)
+                                .foregroundStyle(Color.appAccent)
                             Text(person == "Unassigned" ? person : "@\(person)")
                                 .textCase(nil)
                                 .font(.headline)
@@ -63,6 +63,8 @@ struct PeopleView: View {
                 }
             }
             .listStyle(.insetGrouped)
+            .scrollContentBackground(.hidden)
+            .background(Color.warmBg)
             .navigationTitle("People")
             .overlay {
                 if delegatedItems.isEmpty && contactItems.isEmpty {

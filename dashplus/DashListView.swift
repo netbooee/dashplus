@@ -84,6 +84,9 @@ struct DashListView: View {
 
             InlineAddItemRow(list: list)
         }
+        .listStyle(.insetGrouped)
+        .scrollContentBackground(.hidden)
+        .background(Color.warmBg)
         .navigationTitle(list.prefix.isEmpty ? list.name : "\(list.prefix) · \(list.name)")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {

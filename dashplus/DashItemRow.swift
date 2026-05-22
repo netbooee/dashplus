@@ -4,6 +4,7 @@ struct DashItemRow: View {
     @Bindable var item: DashItem
     var isCompact: Bool = false
     var showPrefix: Bool = true
+    var showDate: Bool = false
     var isOverdue: Bool = false
     @Environment(\.editMode) private var editMode
     @State private var showingSymbolPicker = false
@@ -13,6 +14,7 @@ struct DashItemRow: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: isCompact ? 6 : 8) {
+            // Symbol button
             Button { showingSymbolPicker = true } label: {
                 Image(systemName: item.symbol.systemImageName)
                     .foregroundStyle(item.symbol.color)
@@ -25,14 +27,9 @@ struct DashItemRow: View {
 
             VStack(alignment: .leading, spacing: 1) {
                 if isEditing {
-                    HStack(spacing: 4) {
+                    HStack(alignment: .center, spacing: 6) {
                         if !listPrefix.isEmpty {
-                            Text(listPrefix + ":")
-                                .font(isCompact
-                                    ? .system(.caption, design: .monospaced)
-                                    : .system(.subheadline, design: .monospaced))
-                                .foregroundStyle(.secondary)
-                                .fixedSize()
+                            PrefixChip(prefix: listPrefix)
                         }
                         TextField("", text: $editText)
                             .font(isCompact
@@ -46,20 +43,26 @@ struct DashItemRow: View {
                             }
                     }
                 } else {
-                    itemText
-                        .font(isCompact
-                            ? .system(.caption, design: .monospaced)
-                            : .system(.subheadline, design: .monospaced))
-                        .fixedSize(horizontal: false, vertical: true)
-                        .foregroundStyle(
-                            item.symbol == .plus ? Color.secondary :
-                            isOverdue             ? Color.red       : Color.primary
-                        )
-                        .onTapGesture {
-                            guard editMode?.wrappedValue != .active else { return }
-                            editText = item.text
-                            isEditing = true
+                    HStack(alignment: .top, spacing: 6) {
+                        if !listPrefix.isEmpty {
+                            PrefixChip(prefix: listPrefix)
+                                .padding(.top, isCompact ? 1 : 2)
                         }
+                        Text(item.text)
+                            .font(isCompact
+                                ? .system(.caption, design: .monospaced)
+                                : .system(.subheadline, design: .monospaced))
+                            .fixedSize(horizontal: false, vertical: true)
+                            .foregroundStyle(
+                                item.symbol == .plus ? Color.secondary :
+                                isOverdue             ? Color.red       : Color.primary
+                            )
+                            .onTapGesture {
+                                guard editMode?.wrappedValue != .active else { return }
+                                editText = item.text
+                                isEditing = true
+                            }
+                    }
                 }
 
                 if let annotation {
@@ -84,14 +87,12 @@ struct DashItemRow: View {
                     scheduledDate: item.scheduledDate
                 ),
                 currentListID: item.list?.id,
-                onMoveToList: { list in
-                    item.list = list
-                }
+                onMoveToList: { list in item.list = list }
             ) { result in
                 let wasLeftArrow = item.symbol == .leftArrow
-                item.symbol = result.symbol
-                item.assignedTo = result.assignedTo
-                item.waitingFor = result.waitingFor
+                item.symbol        = result.symbol
+                item.assignedTo    = result.assignedTo
+                item.waitingFor    = result.waitingFor
                 item.scheduledDate = result.scheduledDate
                 if result.symbol == .leftArrow && !wasLeftArrow {
                     item.delegatedAt = Date()
@@ -102,57 +103,78 @@ struct DashItemRow: View {
         }
     }
 
+    // MARK: - Helpers
+
     private var listPrefix: String {
         showPrefix ? (item.list?.prefix ?? "") : ""
     }
 
-    private var itemText: Text {
-        if listPrefix.isEmpty {
-            return Text(item.text)
-        }
-        return Text(listPrefix + ": ").foregroundStyle(.secondary) + Text(item.text)
-    }
-
     private func commitEdit() {
         let trimmed = editText.trimmingCharacters(in: .whitespaces)
-        if !trimmed.isEmpty {
-            item.text = trimmed
-        }
+        if !trimmed.isEmpty { item.text = trimmed }
         isEditing = false
     }
 
-    private static let meetingDateFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.dateStyle = .medium
-        f.timeStyle = .none
-        return f
-    }()
-
-    private static let relativeDateFormatter: RelativeDateTimeFormatter = {
-        let f = RelativeDateTimeFormatter()
-        f.unitsStyle = .full
-        return f
-    }()
+    // MARK: - Annotation
 
     private var annotation: String? {
         switch item.symbol {
         case .leftArrow:
             let name = item.assignedTo.isEmpty ? nil : "@\(item.assignedTo)"
-            let age = item.delegatedAt.map {
+            let age  = item.delegatedAt.map {
                 Self.relativeDateFormatter.localizedString(for: $0, relativeTo: Date())
             }
-            switch (name, age) {
-            case (let n?, let a?): return "\(n) · \(a)"
-            case (let n?, nil):    return n
-            case (nil, let a?):    return a
-            default:               return nil
-            }
+            let combined: String? = {
+                switch (name, age) {
+                case (let n?, let a?): return "\(n) · \(a)"
+                case (let n?, nil):    return n
+                case (nil, let a?):    return a
+                default:               return nil
+                }
+            }()
+            return combined ?? dateContext
+
         case .rightArrow where !item.waitingFor.isEmpty:
             return "→\(item.waitingFor)"
+
         case .scheduledMeeting:
             return Self.meetingDateFormatter.string(from: item.scheduledDate)
+
         default:
-            return nil
+            return dateContext
         }
     }
+
+    /// Friendly date label shown when `showDate` is true and no other annotation applies.
+    private var dateContext: String? {
+        guard showDate else { return nil }
+        let cal = Calendar.current
+        let today    = cal.startOfDay(for: Date())
+        let itemDay  = cal.startOfDay(for: item.scheduledDate)
+        let diff     = cal.dateComponents([.day], from: today, to: itemDay).day ?? 0
+        switch diff {
+        case 0:      return "Today"
+        case 1:      return "Tomorrow"
+        case 2...6:  return Self.dayFormatter.string(from: item.scheduledDate)
+        default:     return Self.shortDateFormatter.string(from: item.scheduledDate)
+        }
+    }
+
+    // MARK: - Formatters
+
+    private static let meetingDateFormatter: DateFormatter = {
+        let f = DateFormatter(); f.dateStyle = .medium; f.timeStyle = .none; return f
+    }()
+
+    private static let relativeDateFormatter: RelativeDateTimeFormatter = {
+        let f = RelativeDateTimeFormatter(); f.unitsStyle = .full; return f
+    }()
+
+    private static let dayFormatter: DateFormatter = {
+        let f = DateFormatter(); f.dateFormat = "EEE"; return f
+    }()
+
+    private static let shortDateFormatter: DateFormatter = {
+        let f = DateFormatter(); f.dateStyle = .short; f.timeStyle = .none; return f
+    }()
 }

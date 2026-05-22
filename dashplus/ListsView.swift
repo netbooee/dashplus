@@ -33,7 +33,7 @@ struct ListsView: View {
                                 .sorted { $0.createdAt < $1.createdAt }
 
                             ForEach(active) { item in
-                                DashItemRow(item: item, showPrefix: false)
+                                DashItemRow(item: item, showPrefix: true, showDate: true)
                             }
 
                             if !someday.isEmpty {
@@ -103,14 +103,7 @@ struct ListsView: View {
                                         .foregroundStyle(.secondary)
                                         .frame(width: 14)
 
-                                    if !list.prefix.isEmpty {
-                                        Text(list.prefix)
-                                            .font(.system(.caption, design: .monospaced, weight: .bold))
-                                            .padding(.horizontal, 6)
-                                            .padding(.vertical, 2)
-                                            .background(.secondary.opacity(0.12))
-                                            .clipShape(RoundedRectangle(cornerRadius: 4))
-                                    }
+                                    PrefixChip(prefix: list.prefix, large: true)
 
                                     Text(list.name)
                                         .font(.headline)
@@ -141,11 +134,11 @@ struct ListsView: View {
 
                             Spacer()
 
-                            // Navigate to full list view
+                            // Navigate to full project view
                             NavigationLink(destination: DashListView(list: list)) {
                                 Image(systemName: "arrow.right.circle")
-                                    .font(.system(size: 15))
-                                    .foregroundStyle(.secondary)
+                                    .font(.system(size: 17))
+                                    .foregroundStyle(Color.appAccent)
                             }
                             .padding(.trailing, 4)
                         }
@@ -154,6 +147,8 @@ struct ListsView: View {
                 }
             }
             .listStyle(.insetGrouped)
+            .scrollContentBackground(.hidden)
+            .background(Color.warmBg)
             .navigationTitle("Projects")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
