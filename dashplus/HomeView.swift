@@ -1,11 +1,11 @@
 import SwiftUI
 import SwiftData
 
-// MARK: - Palette
+// MARK: - App palette
 
 extension Color {
-    static let appAccent     = Color(red: 0.76, green: 0.34, blue: 0.20) // terracotta
-    static let warmBg        = Color(red: 0.96, green: 0.93, blue: 0.89) // cream list bg
+    static let appAccent = Color(red: 0.76, green: 0.34, blue: 0.20) // terracotta
+    static let warmBg    = Color(red: 0.96, green: 0.93, blue: 0.89) // cream
 }
 
 // MARK: - HomeView
@@ -17,7 +17,14 @@ struct HomeView: View {
     @State private var showingQuickEntry = false
     @State private var collapsedSections: Set<Date> = []
 
-    // MARK: Row model
+    // MARK: - Types
+
+    /// Proper Identifiable struct so ForEach can resolve id without key-path ambiguity.
+    private struct DaySection: Identifiable {
+        let date: Date
+        let rows: [HomeRow]
+        var id: Date { date }
+    }
 
     private enum HomeRow: Identifiable {
         case groupHeader(title: String, symbol: ItemSymbol, count: Int, uid: String)
@@ -31,7 +38,7 @@ struct HomeView: View {
         }
     }
 
-    // MARK: Symbol groups (order matters)
+    // MARK: - Symbol groups (order matters)
 
     private static let symbolGroups: [(title: String, symbols: [ItemSymbol])] = [
         ("To Do",                    [.dash]),
@@ -41,13 +48,13 @@ struct HomeView: View {
         ("Waiting For",              [.rightArrow]),
     ]
 
-    // MARK: Computed data
+    // MARK: - Computed data
 
     private var todayStart: Date {
         Calendar.current.startOfDay(for: Date())
     }
 
-    private var groupedByDay: [(date: Date, rows: [HomeRow])] {
+    private var sections: [DaySection] {
         let calendar = Calendar.current
         let today = todayStart
 
@@ -56,16 +63,23 @@ struct HomeView: View {
             $0.symbol != .person && $0.symbol != .someday
         }
 
-        let todayItems  = active.filter { calendar.startOfDay(for: $0.scheduledDate) <= today }
-        let todayRows   = makeRows(from: todayItems, sectionDate: today, todayStart: today)
+        // Today: everything on or before today
+        let todayRows = makeRows(
+            from: active.filter { calendar.startOfDay(for: $0.scheduledDate) <= today },
+            sectionDate: today,
+            todayStart: today
+        )
 
+        // Future: one section per future date
         let futureItems = active.filter { calendar.startOfDay(for: $0.scheduledDate) > today }
-        let byDay       = Dictionary(grouping: futureItems) { calendar.startOfDay(for: $0.scheduledDate) }
+        let byDay = Dictionary(grouping: futureItems) { calendar.startOfDay(for: $0.scheduledDate) }
         let futureSections = byDay
             .sorted { $0.key < $1.key }
-            .map { date, items in (date: date, rows: makeRows(from: items, sectionDate: date, todayStart: today)) }
+            .map { date, items in
+                DaySection(date: date, rows: makeRows(from: items, sectionDate: date, todayStart: today))
+            }
 
-        return [(date: today, rows: todayRows)] + futureSections
+        return [DaySection(date: today, rows: todayRows)] + futureSections
     }
 
     private func makeRows(from items: [DashItem], sectionDate: Date, todayStart: Date) -> [HomeRow] {
@@ -91,73 +105,29 @@ struct HomeView: View {
         return rows
     }
 
-    // MARK: Formatters
+    // MARK: - Formatters
 
     private static let fullDateFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.dateStyle = .full
-        f.timeStyle = .none
-        return f
+        let f = DateFormatter(); f.dateStyle = .full; f.timeStyle = .none; return f
     }()
-
     private static let dayAbbrevFormatter: DateFormatter = {
         let f = DateFormatter(); f.dateFormat = "EEE"; return f
     }()
-
     private static let dayNumberFormatter: DateFormatter = {
         let f = DateFormatter(); f.dateFormat = "d"; return f
     }()
 
-    // MARK: Day picker strip
-
-    @ViewBuilder
-    private func dayPickerStrip(proxy: ScrollViewProxy) -> some View {
-        let days = groupedByDay
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 6) {
-                ForEach(days, id: \.date) { day in
-                    let isToday = day.date == todayStart
-                    let hasItems = !day.rows.isEmpty
-                    Button {
-                        withAnimation(.easeInOut(duration: 0.25)) {
-                            proxy.scrollTo("anchor-\(Int(day.date.timeIntervalSince1970))", anchor: .top)
-                        }
-                    } label: {
-                        VStack(spacing: 3) {
-                            Text(Self.dayAbbrevFormatter.string(from: day.date).uppercased())
-                                .font(.system(size: 10, weight: .semibold))
-                            Text(Self.dayNumberFormatter.string(from: day.date))
-                                .font(.system(size: 20, weight: .bold))
-                            Circle()
-                                .fill(isToday ? Color.white : Color.appAccent)
-                                .frame(width: 4, height: 4)
-                                .opacity(hasItems ? 1 : 0)
-                        }
-                        .foregroundStyle(isToday ? Color.white : Color.primary)
-                        .frame(width: 52)
-                        .padding(.vertical, 8)
-                        .background(isToday ? Color.appAccent : Color.clear)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 6)
-        }
-    }
-
-    // MARK: Body
+    // MARK: - Body
 
     var body: some View {
         NavigationStack {
             ScrollViewReader { proxy in
                 List {
-                    ForEach(groupedByDay, id: \.date) { day in
+                    ForEach(sections) { day in
                         let isToday = day.date == todayStart
                         Section {
-                            // Invisible scroll anchor — always present so tapping a
-                            // day chip can scroll here even when the section is collapsed
+                            // Invisible anchor row — always present so tapping a
+                            // day chip can scroll here even when collapsed.
                             Color.clear
                                 .frame(height: 0)
                                 .listRowInsets(.zero)
@@ -199,40 +169,7 @@ struct HomeView: View {
                                 }
                             }
                         } header: {
-                            Button {
-                                withAnimation(.easeInOut(duration: 0.2)) {
-                                    if collapsedSections.contains(day.date) {
-                                        collapsedSections.remove(day.date)
-                                    } else {
-                                        collapsedSections.insert(day.date)
-                                    }
-                                }
-                            } label: {
-                                HStack(spacing: 6) {
-                                    Image(systemName: collapsedSections.contains(day.date) ? "chevron.right" : "chevron.down")
-                                        .font(.system(size: 11, weight: .semibold))
-                                        .foregroundStyle(.secondary)
-
-                                    Text(isToday ? "Today" : Self.fullDateFormatter.string(from: day.date))
-                                        .font(.subheadline.weight(.semibold))
-                                        .foregroundStyle(isToday ? Color.appAccent : .primary)
-                                        .textCase(nil)
-
-                                    Spacer()
-
-                                    if collapsedSections.contains(day.date) {
-                                        let count = day.rows.filter {
-                                            if case .dashItem = $0 { return true }; return false
-                                        }.count
-                                        Text("\(count)")
-                                            .font(.caption.weight(.medium))
-                                            .foregroundStyle(.secondary)
-                                            .monospacedDigit()
-                                    }
-                                }
-                                .contentShape(Rectangle())
-                            }
-                            .buttonStyle(.plain)
+                            sectionHeader(for: day, isToday: isToday)
                         }
                     }
                 }
@@ -240,15 +177,13 @@ struct HomeView: View {
                 .scrollContentBackground(.hidden)
                 .background(Color.warmBg)
                 .safeAreaInset(edge: .top, spacing: 0) {
-                    dayPickerStrip(proxy: proxy)
+                    dayPickerStrip(sections: sections, proxy: proxy)
                         .background(.bar)
                 }
             }
             .navigationTitle("Dash Plus")
             .overlay(alignment: .bottomTrailing) {
-                Button {
-                    showingQuickEntry = true
-                } label: {
+                Button { showingQuickEntry = true } label: {
                     Image(systemName: "plus.circle.fill")
                         .font(.system(size: 56))
                         .symbolRenderingMode(.palette)
@@ -260,13 +195,86 @@ struct HomeView: View {
             .sheet(isPresented: $showingQuickEntry) {
                 QuickEntrySheet()
             }
-            .task {
-                ensureGENExists()
-            }
+            .task { ensureGENExists() }
         }
     }
 
-    // MARK: Helpers
+    // MARK: - Sub-views
+
+    @ViewBuilder
+    private func sectionHeader(for day: DaySection, isToday: Bool) -> some View {
+        Button {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                if collapsedSections.contains(day.date) {
+                    collapsedSections.remove(day.date)
+                } else {
+                    collapsedSections.insert(day.date)
+                }
+            }
+        } label: {
+            HStack(spacing: 6) {
+                Image(systemName: collapsedSections.contains(day.date) ? "chevron.right" : "chevron.down")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(.secondary)
+
+                Text(isToday ? "Today" : Self.fullDateFormatter.string(from: day.date))
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(isToday ? Color.appAccent : .primary)
+                    .textCase(nil)
+
+                Spacer()
+
+                if collapsedSections.contains(day.date) {
+                    let count = day.rows.filter {
+                        if case .dashItem = $0 { return true }; return false
+                    }.count
+                    Text("\(count)")
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(.secondary)
+                        .monospacedDigit()
+                }
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func dayPickerStrip(sections: [DaySection], proxy: ScrollViewProxy) -> some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 6) {
+                ForEach(sections) { day in
+                    let isToday = day.date == todayStart
+                    let hasItems = !day.rows.isEmpty
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.25)) {
+                            proxy.scrollTo("anchor-\(Int(day.date.timeIntervalSince1970))", anchor: .top)
+                        }
+                    } label: {
+                        VStack(spacing: 3) {
+                            Text(Self.dayAbbrevFormatter.string(from: day.date).uppercased())
+                                .font(.system(size: 10, weight: .semibold))
+                            Text(Self.dayNumberFormatter.string(from: day.date))
+                                .font(.system(size: 20, weight: .bold))
+                            Circle()
+                                .fill(isToday ? Color.white : Color.appAccent)
+                                .frame(width: 4, height: 4)
+                                .opacity(hasItems ? 1 : 0)
+                        }
+                        .foregroundStyle(isToday ? Color.white : Color.primary)
+                        .frame(width: 52)
+                        .padding(.vertical, 8)
+                        .background(isToday ? Color.appAccent : Color.clear)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 6)
+        }
+    }
+
+    // MARK: - Helpers
 
     private func ensureGENExists() {
         guard !lists.contains(where: { $0.prefix == "GEN" }) else { return }
