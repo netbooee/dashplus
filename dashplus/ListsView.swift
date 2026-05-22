@@ -1,124 +1,88 @@
 import SwiftUI
 import SwiftData
 
+// MARK: - Tile sub-views
+
+private struct ProjectTile: View {
+    let list: DashList
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .top) {
+                PrefixChip(prefix: list.prefix, large: true)
+                Spacer()
+                Text("\(list.itemList.count)")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                    .monospacedDigit()
+            }
+            Text(list.name)
+                .font(.headline)
+                .foregroundStyle(.primary)
+                .lineLimit(2)
+                .multilineTextAlignment(.leading)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(14)
+        .background(Color(UIColor.secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+    }
+}
+
+private struct NewProjectTile: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Image(systemName: "plus")
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundStyle(Color.appAccent)
+            Text("New Project")
+                .font(.headline)
+                .foregroundStyle(Color.appAccent)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(14)
+        .background(Color.appAccent.opacity(0.06))
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .overlay {
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(Color.appAccent.opacity(0.3), lineWidth: 1.5)
+        }
+    }
+}
+
+// MARK: - ListsView
+
 struct ListsView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \DashList.createdAt) private var lists: [DashList]
     @State private var showingNewList = false
     @State private var editingList: DashList?
-    @State private var expandedLists: Set<UUID> = []
-    @State private var completedCollapsed: Set<UUID> = []
-    @State private var somedayCollapsed: Set<UUID> = []
     @State private var showingImporter = false
     @State private var importError: String?
 
+    private let columns = [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)]
+
     var body: some View {
         NavigationStack {
-            List {
-                ForEach(lists) { list in
-                    Section {
-                        if expandedLists.contains(list.id) {
-                            let active = list.itemList
-                                .filter { $0.symbol != .plus && $0.symbol != .someday }
-                                .sorted {
-                                    $0.sortOrder == $1.sortOrder
-                                        ? $0.createdAt < $1.createdAt
-                                        : $0.sortOrder < $1.sortOrder
-                                }
-                            let someday = list.itemList
-                                .filter { $0.symbol == .someday }
-                                .sorted { $0.createdAt < $1.createdAt }
-                            let completed = list.itemList
-                                .filter { $0.symbol == .plus }
-                                .sorted { $0.createdAt < $1.createdAt }
-
-                            ForEach(active) { item in
-                                DashItemRow(item: item, showPrefix: true, showDate: true)
-                            }
-
-                            if !someday.isEmpty {
-                                CompletedArchiveDivider(
-                                    title: "Someday / Maybe",
-                                    isCollapsed: somedayCollapsed.contains(list.id),
-                                    count: someday.count
-                                ) {
-                                    withAnimation(.easeInOut(duration: 0.2)) {
-                                        if somedayCollapsed.contains(list.id) {
-                                            somedayCollapsed.remove(list.id)
-                                        } else {
-                                            somedayCollapsed.insert(list.id)
-                                        }
-                                    }
-                                }
-                                .listRowSeparator(.hidden)
-                                .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
-
-                                if !somedayCollapsed.contains(list.id) {
-                                    ForEach(someday) { item in
-                                        DashItemRow(item: item, isCompact: true, showPrefix: false)
-                                    }
-                                }
-                            }
-
-                            if !completed.isEmpty {
-                                CompletedArchiveDivider(
-                                    isCollapsed: completedCollapsed.contains(list.id),
-                                    count: completed.count
-                                ) {
-                                    withAnimation(.easeInOut(duration: 0.2)) {
-                                        if completedCollapsed.contains(list.id) {
-                                            completedCollapsed.remove(list.id)
-                                        } else {
-                                            completedCollapsed.insert(list.id)
-                                        }
-                                    }
-                                }
-                                .listRowSeparator(.hidden)
-                                .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
-
-                                if !completedCollapsed.contains(list.id) {
-                                    ForEach(completed) { item in
-                                        DashItemRow(item: item, isCompact: true, showPrefix: false)
-                                    }
-                                }
-                            }
-
-                            InlineAddItemRow(list: list)
-                        }
-                    } header: {
-                        HStack(spacing: 0) {
-                            // Expand / collapse toggle
-                            Button {
-                                withAnimation(.easeInOut(duration: 0.2)) {
-                                    if expandedLists.contains(list.id) {
-                                        expandedLists.remove(list.id)
-                                    } else {
-                                        expandedLists.insert(list.id)
-                                    }
-                                }
-                            } label: {
-                                HStack(spacing: 8) {
-                                    Image(systemName: expandedLists.contains(list.id) ? "chevron.down" : "chevron.right")
-                                        .font(.system(size: 11, weight: .semibold))
-                                        .foregroundStyle(.secondary)
-                                        .frame(width: 14)
-
-                                    PrefixChip(prefix: list.prefix, large: true)
-
-                                    Text(list.name)
-                                        .font(.headline)
-                                        .textCase(nil)
-                                        .foregroundStyle(.primary)
-
-                                    Text("·")
-                                        .foregroundStyle(.tertiary)
-
-                                    Text("\(list.itemList.count)")
-                                        .font(.subheadline)
-                                        .foregroundStyle(.secondary)
-                                        .monospacedDigit()
-                                }
-                                .contentShape(Rectangle())
+            ScrollView {
+                if lists.isEmpty {
+                    // Empty state inside the scroll view
+                    VStack(spacing: 16) {
+                        Image(systemName: "folder")
+                            .font(.system(size: 48))
+                            .foregroundStyle(.secondary)
+                        Text("No Projects")
+                            .font(.title3.weight(.semibold))
+                        Text("Tap New Project to get started")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 80)
+                } else {
+                    LazyVGrid(columns: columns, spacing: 12) {
+                        ForEach(lists) { list in
+                            NavigationLink(destination: DashListView(list: list)) {
+                                ProjectTile(list: list)
                             }
                             .buttonStyle(.plain)
                             .contextMenu {
@@ -131,25 +95,19 @@ struct ListsView: View {
                                     Label("Delete Project", systemImage: "trash")
                                 }
                             }
-
-                            Spacer()
-
-                            // Navigate to full project view
-                            NavigationLink(destination: DashListView(list: list)) {
-                                Image(systemName: "arrow.right.circle")
-                                    .font(.system(size: 17))
-                                    .foregroundStyle(Color.appAccent)
-                            }
-                            .padding(.trailing, 4)
                         }
-                        .padding(.vertical, 2)
+
+                        Button { showingNewList = true } label: {
+                            NewProjectTile()
+                        }
+                        .buttonStyle(.plain)
                     }
+                    .padding(16)
                 }
             }
-            .listStyle(.insetGrouped)
-            .scrollContentBackground(.hidden)
             .background(Color.warmBg)
             .navigationTitle("Projects")
+            .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Menu {
@@ -181,15 +139,6 @@ struct ListsView: View {
                 Button("OK") { importError = nil }
             } message: { error in
                 Text(error)
-            }
-            .overlay {
-                if lists.isEmpty {
-                    ContentUnavailableView(
-                        "No Projects",
-                        systemImage: "folder",
-                        description: Text("Tap + to create your first project")
-                    )
-                }
             }
         }
     }

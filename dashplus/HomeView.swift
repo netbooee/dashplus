@@ -8,7 +8,7 @@ extension Color {
     static let warmBg    = Color(red: 0.96, green: 0.93, blue: 0.89) // cream
 }
 
-// MARK: - Supporting types (file-scope so ForEach can infer them)
+// MARK: - Supporting types
 
 fileprivate struct DaySection: Identifiable {
     let date: Date
@@ -28,7 +28,6 @@ fileprivate enum HomeDayRow: Identifiable {
     }
 }
 
-/// Renders a single HomeDayRow so the ForEach body stays typed and simple.
 fileprivate struct HomeDayRowView: View {
     let row: HomeDayRow
     var body: some View {
@@ -92,10 +91,8 @@ struct HomeView: View {
         }
         let todaySection = DaySection(
             date: today,
-            rows: makeRows(
-                from: active.filter { calendar.startOfDay(for: $0.scheduledDate) <= today },
-                sectionDate: today, todayStart: today
-            )
+            rows: makeRows(from: active.filter { calendar.startOfDay(for: $0.scheduledDate) <= today },
+                           sectionDate: today, todayStart: today)
         )
         let futureItems = active.filter { calendar.startOfDay(for: $0.scheduledDate) > today }
         let futureSections = Dictionary(grouping: futureItems) { calendar.startOfDay(for: $0.scheduledDate) }
@@ -115,12 +112,8 @@ struct HomeView: View {
                 .sorted { ($0.list?.prefix ?? "") < ($1.list?.prefix ?? "") }
             guard !filtered.isEmpty else { continue }
             let uid = "\(Int(sectionDate.timeIntervalSince1970))-\(group.title)"
-            rows.append(.groupHeader(
-                title: group.title,
-                symbol: group.symbols.first!,
-                count: filtered.count,
-                uid: uid
-            ))
+            rows.append(.groupHeader(title: group.title, symbol: group.symbols.first!,
+                                     count: filtered.count, uid: uid))
             for item in filtered {
                 rows.append(.dashItem(item, isOverdue: calendar.startOfDay(for: item.scheduledDate) < todayStart))
             }
@@ -144,45 +137,36 @@ struct HomeView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollViewReader { proxy in
-                List {
-                    ForEach(groupedDays) { day in
-                        let isToday = day.date == todayStart
-                        Section {
-                            // Zero-height anchor — always rendered so scrollTo works
-                            // even when the section is collapsed.
-                            Color.clear
-                                .frame(height: 0)
-                                .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-                                .listRowSeparator(.hidden)
-                                .id("anchor-\(Int(day.date.timeIntervalSince1970))")
-
-                            if !collapsedSections.contains(day.date) {
-                                if day.rows.isEmpty {
-                                    Text("No items for today")
-                                        .font(.subheadline)
-                                        .foregroundStyle(.tertiary)
-                                        .listRowInsets(EdgeInsets(top: 10, leading: 16, bottom: 10, trailing: 16))
-                                } else {
-                                    ForEach(day.rows) { row in
-                                        HomeDayRowView(row: row)
-                                    }
+            List {
+                ForEach(groupedDays) { day in
+                    let isToday = day.date == todayStart
+                    Section {
+                        if !collapsedSections.contains(day.date) {
+                            if day.rows.isEmpty {
+                                Text("No items for today")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.tertiary)
+                                    .listRowInsets(EdgeInsets(top: 10, leading: 16, bottom: 10, trailing: 16))
+                            } else {
+                                ForEach(day.rows) { row in
+                                    HomeDayRowView(row: row)
                                 }
                             }
-                        } header: {
-                            sectionHeader(day: day, isToday: isToday)
                         }
+                    } header: {
+                        sectionHeader(day: day, isToday: isToday)
                     }
                 }
-                .listStyle(.insetGrouped)
-                .scrollContentBackground(.hidden)
-                .background(Color.warmBg)
-                .safeAreaInset(edge: .top, spacing: 0) {
-                    dayPickerStrip(days: groupedDays, proxy: proxy)
-                        .background(.bar)
-                }
             }
-            .navigationTitle("Dash Plus")
+            .listStyle(.insetGrouped)
+            .scrollContentBackground(.hidden)
+            .background(Color.warmBg)
+            .safeAreaInset(edge: .top, spacing: 0) {
+                dayPickerStrip(days: groupedDays)
+                    .background(.bar)
+            }
+            .navigationTitle("All Items")
+            .navigationBarTitleDisplayMode(.large)
             .overlay(alignment: .bottomTrailing) {
                 Button { showingQuickEntry = true } label: {
                     Image(systemName: "plus.circle.fill")
@@ -200,7 +184,7 @@ struct HomeView: View {
         }
     }
 
-    // MARK: Sub-views
+    // MARK: Section header
 
     @ViewBuilder
     private func sectionHeader(day: DaySection, isToday: Bool) -> some View {
@@ -235,7 +219,10 @@ struct HomeView: View {
         .buttonStyle(.plain)
     }
 
-    private func dayPickerStrip(days: [DaySection], proxy: ScrollViewProxy) -> some View {
+    // MARK: Day picker strip
+    // Tapping a chip collapses all other sections, focusing that day.
+
+    private func dayPickerStrip(days: [DaySection]) -> some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 6) {
                 ForEach(days) { day in
@@ -243,7 +230,9 @@ struct HomeView: View {
                     let hasItems = !day.rows.isEmpty
                     Button {
                         withAnimation(.easeInOut(duration: 0.25)) {
-                            proxy.scrollTo("anchor-\(Int(day.date.timeIntervalSince1970))", anchor: .top)
+                            // Collapse every section except the tapped one
+                            let allDates = Set(groupedDays.map(\.date))
+                            collapsedSections = allDates.subtracting([day.date])
                         }
                     } label: {
                         VStack(spacing: 3) {
