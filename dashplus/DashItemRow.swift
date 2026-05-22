@@ -66,11 +66,17 @@ struct DashItemRow: View {
                 }
 
                 if let annotation {
-                    Text(annotation)
-                        .font(isCompact
-                            ? .system(.caption2, design: .monospaced)
-                            : .system(.caption, design: .monospaced))
-                        .foregroundStyle(.secondary)
+                    HStack(alignment: .top, spacing: 6) {
+                        if !listPrefix.isEmpty {
+                            PrefixChip(prefix: listPrefix)
+                                .hidden()
+                        }
+                        Text(annotation)
+                            .font(isCompact
+                                ? .system(.caption2, design: .monospaced)
+                                : .system(.caption, design: .monospaced))
+                            .foregroundStyle(.secondary)
+                    }
                 }
             }
 
