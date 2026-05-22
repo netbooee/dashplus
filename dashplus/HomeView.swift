@@ -49,7 +49,8 @@ fileprivate struct HomeDayRowView: View {
                     .monospacedDigit()
             }
             .listRowSeparator(.hidden)
-            .listRowInsets(EdgeInsets(top: 10, leading: 16, bottom: 2, trailing: 16))
+            .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+            .listRowBackground(Color.warmBg)
 
         case .dashItem(let item, let isOverdue):
             DashItemRow(item: item, isOverdue: isOverdue)
