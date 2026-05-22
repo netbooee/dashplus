@@ -8,6 +8,56 @@ extension Color {
     static let warmBg    = Color(red: 0.96, green: 0.93, blue: 0.89) // cream
 }
 
+// MARK: - Supporting types (file-scope so ForEach can infer them)
+
+fileprivate struct DaySection: Identifiable {
+    let date: Date
+    let rows: [HomeDayRow]
+    var id: Date { date }
+}
+
+fileprivate enum HomeDayRow: Identifiable {
+    case groupHeader(title: String, symbol: ItemSymbol, count: Int, uid: String)
+    case dashItem(DashItem, isOverdue: Bool)
+
+    var id: String {
+        switch self {
+        case .groupHeader(_, _, _, let uid): return uid
+        case .dashItem(let item, _):         return item.id.uuidString
+        }
+    }
+}
+
+/// Renders a single HomeDayRow so the ForEach body stays typed and simple.
+fileprivate struct HomeDayRowView: View {
+    let row: HomeDayRow
+    var body: some View {
+        switch row {
+        case .groupHeader(let title, let symbol, let count, _):
+            HStack(spacing: 8) {
+                Image(systemName: symbol.systemImageName)
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(symbol.color)
+                    .frame(width: 16)
+                Text(title)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                    .textCase(.uppercase)
+                Spacer()
+                Text("\(count)")
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(.secondary)
+                    .monospacedDigit()
+            }
+            .listRowSeparator(.hidden)
+            .listRowInsets(EdgeInsets(top: 10, leading: 16, bottom: 2, trailing: 16))
+
+        case .dashItem(let item, let isOverdue):
+            DashItemRow(item: item, isOverdue: isOverdue)
+        }
+    }
+}
+
 // MARK: - HomeView
 
 struct HomeView: View {
@@ -17,28 +67,7 @@ struct HomeView: View {
     @State private var showingQuickEntry = false
     @State private var collapsedSections: Set<Date> = []
 
-    // MARK: - Types
-
-    /// Proper Identifiable struct so ForEach can resolve id without key-path ambiguity.
-    private struct DaySection: Identifiable {
-        let date: Date
-        let rows: [HomeRow]
-        var id: Date { date }
-    }
-
-    private enum HomeRow: Identifiable {
-        case groupHeader(title: String, symbol: ItemSymbol, count: Int, uid: String)
-        case dashItem(DashItem, isOverdue: Bool)
-
-        var id: String {
-            switch self {
-            case .groupHeader(_, _, _, let uid): return uid
-            case .dashItem(let item, _):         return item.id.uuidString
-            }
-        }
-    }
-
-    // MARK: - Symbol groups (order matters)
+    // MARK: Symbol groups (order matters)
 
     private static let symbolGroups: [(title: String, symbols: [ItemSymbol])] = [
         ("To Do",                    [.dash]),
@@ -48,43 +77,38 @@ struct HomeView: View {
         ("Waiting For",              [.rightArrow]),
     ]
 
-    // MARK: - Computed data
+    // MARK: Computed data
 
     private var todayStart: Date {
         Calendar.current.startOfDay(for: Date())
     }
 
-    private var sections: [DaySection] {
+    private var groupedDays: [DaySection] {
         let calendar = Calendar.current
         let today = todayStart
-
         let active = allItems.filter {
             $0.symbol != .plus && $0.symbol != .triangle &&
             $0.symbol != .person && $0.symbol != .someday
         }
-
-        // Today: everything on or before today
-        let todayRows = makeRows(
-            from: active.filter { calendar.startOfDay(for: $0.scheduledDate) <= today },
-            sectionDate: today,
-            todayStart: today
+        let todaySection = DaySection(
+            date: today,
+            rows: makeRows(
+                from: active.filter { calendar.startOfDay(for: $0.scheduledDate) <= today },
+                sectionDate: today, todayStart: today
+            )
         )
-
-        // Future: one section per future date
         let futureItems = active.filter { calendar.startOfDay(for: $0.scheduledDate) > today }
-        let byDay = Dictionary(grouping: futureItems) { calendar.startOfDay(for: $0.scheduledDate) }
-        let futureSections = byDay
+        let futureSections = Dictionary(grouping: futureItems) { calendar.startOfDay(for: $0.scheduledDate) }
             .sorted { $0.key < $1.key }
             .map { date, items in
                 DaySection(date: date, rows: makeRows(from: items, sectionDate: date, todayStart: today))
             }
-
-        return [DaySection(date: today, rows: todayRows)] + futureSections
+        return [todaySection] + futureSections
     }
 
-    private func makeRows(from items: [DashItem], sectionDate: Date, todayStart: Date) -> [HomeRow] {
+    private func makeRows(from items: [DashItem], sectionDate: Date, todayStart: Date) -> [HomeDayRow] {
         let calendar = Calendar.current
-        var rows: [HomeRow] = []
+        var rows: [HomeDayRow] = []
         for group in Self.symbolGroups {
             let filtered = items
                 .filter { group.symbols.contains($0.symbol) }
@@ -98,14 +122,13 @@ struct HomeView: View {
                 uid: uid
             ))
             for item in filtered {
-                let overdue = calendar.startOfDay(for: item.scheduledDate) < todayStart
-                rows.append(.dashItem(item, isOverdue: overdue))
+                rows.append(.dashItem(item, isOverdue: calendar.startOfDay(for: item.scheduledDate) < todayStart))
             }
         }
         return rows
     }
 
-    // MARK: - Formatters
+    // MARK: Formatters
 
     private static let fullDateFormatter: DateFormatter = {
         let f = DateFormatter(); f.dateStyle = .full; f.timeStyle = .none; return f
@@ -117,20 +140,20 @@ struct HomeView: View {
         let f = DateFormatter(); f.dateFormat = "d"; return f
     }()
 
-    // MARK: - Body
+    // MARK: Body
 
     var body: some View {
         NavigationStack {
             ScrollViewReader { proxy in
                 List {
-                    ForEach(sections) { day in
+                    ForEach(groupedDays) { day in
                         let isToday = day.date == todayStart
                         Section {
-                            // Invisible anchor row — always present so tapping a
-                            // day chip can scroll here even when collapsed.
+                            // Zero-height anchor — always rendered so scrollTo works
+                            // even when the section is collapsed.
                             Color.clear
                                 .frame(height: 0)
-                                .listRowInsets(.zero)
+                                .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
                                 .listRowSeparator(.hidden)
                                 .id("anchor-\(Int(day.date.timeIntervalSince1970))")
 
@@ -142,34 +165,12 @@ struct HomeView: View {
                                         .listRowInsets(EdgeInsets(top: 10, leading: 16, bottom: 10, trailing: 16))
                                 } else {
                                     ForEach(day.rows) { row in
-                                        switch row {
-                                        case .groupHeader(let title, let symbol, let count, _):
-                                            HStack(spacing: 8) {
-                                                Image(systemName: symbol.systemImageName)
-                                                    .font(.system(size: 11, weight: .semibold))
-                                                    .foregroundStyle(symbol.color)
-                                                    .frame(width: 16)
-                                                Text(title)
-                                                    .font(.caption.weight(.semibold))
-                                                    .foregroundStyle(.secondary)
-                                                    .textCase(.uppercase)
-                                                Spacer()
-                                                Text("\(count)")
-                                                    .font(.caption.weight(.medium))
-                                                    .foregroundStyle(.secondary)
-                                                    .monospacedDigit()
-                                            }
-                                            .listRowSeparator(.hidden)
-                                            .listRowInsets(EdgeInsets(top: 10, leading: 16, bottom: 2, trailing: 16))
-
-                                        case .dashItem(let item, let isOverdue):
-                                            DashItemRow(item: item, isOverdue: isOverdue)
-                                        }
+                                        HomeDayRowView(row: row)
                                     }
                                 }
                             }
                         } header: {
-                            sectionHeader(for: day, isToday: isToday)
+                            sectionHeader(day: day, isToday: isToday)
                         }
                     }
                 }
@@ -177,7 +178,7 @@ struct HomeView: View {
                 .scrollContentBackground(.hidden)
                 .background(Color.warmBg)
                 .safeAreaInset(edge: .top, spacing: 0) {
-                    dayPickerStrip(sections: sections, proxy: proxy)
+                    dayPickerStrip(days: groupedDays, proxy: proxy)
                         .background(.bar)
                 }
             }
@@ -199,10 +200,10 @@ struct HomeView: View {
         }
     }
 
-    // MARK: - Sub-views
+    // MARK: Sub-views
 
     @ViewBuilder
-    private func sectionHeader(for day: DaySection, isToday: Bool) -> some View {
+    private func sectionHeader(day: DaySection, isToday: Bool) -> some View {
         Button {
             withAnimation(.easeInOut(duration: 0.2)) {
                 if collapsedSections.contains(day.date) {
@@ -216,18 +217,13 @@ struct HomeView: View {
                 Image(systemName: collapsedSections.contains(day.date) ? "chevron.right" : "chevron.down")
                     .font(.system(size: 11, weight: .semibold))
                     .foregroundStyle(.secondary)
-
                 Text(isToday ? "Today" : Self.fullDateFormatter.string(from: day.date))
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(isToday ? Color.appAccent : .primary)
                     .textCase(nil)
-
                 Spacer()
-
                 if collapsedSections.contains(day.date) {
-                    let count = day.rows.filter {
-                        if case .dashItem = $0 { return true }; return false
-                    }.count
+                    let count = day.rows.filter { if case .dashItem = $0 { return true }; return false }.count
                     Text("\(count)")
                         .font(.caption.weight(.medium))
                         .foregroundStyle(.secondary)
@@ -239,10 +235,10 @@ struct HomeView: View {
         .buttonStyle(.plain)
     }
 
-    private func dayPickerStrip(sections: [DaySection], proxy: ScrollViewProxy) -> some View {
+    private func dayPickerStrip(days: [DaySection], proxy: ScrollViewProxy) -> some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 6) {
-                ForEach(sections) { day in
+                ForEach(days) { day in
                     let isToday = day.date == todayStart
                     let hasItems = !day.rows.isEmpty
                     Button {
@@ -274,7 +270,7 @@ struct HomeView: View {
         }
     }
 
-    // MARK: - Helpers
+    // MARK: Helpers
 
     private func ensureGENExists() {
         guard !lists.contains(where: { $0.prefix == "GEN" }) else { return }
