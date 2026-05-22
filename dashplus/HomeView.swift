@@ -154,17 +154,24 @@ struct HomeView: View {
                             }
                         }
                     } header: {
-                        sectionHeader(day: day, isToday: isToday)
+                        // The Today section header embeds the day picker strip so
+                        // it stays sticky while scrolling through today's items.
+                        // Future date headers are just the collapse toggle.
+                        if isToday {
+                            VStack(spacing: 0) {
+                                dayPickerStrip(days: groupedDays)
+                                    .padding(.bottom, 4)
+                                sectionHeader(day: day, isToday: true)
+                            }
+                        } else {
+                            sectionHeader(day: day, isToday: false)
+                        }
                     }
                 }
             }
             .listStyle(.insetGrouped)
             .scrollContentBackground(.hidden)
             .background(Color.warmBg)
-            .safeAreaInset(edge: .top, spacing: 0) {
-                dayPickerStrip(days: groupedDays)
-                    .background(.bar)
-            }
             .navigationTitle("All Items")
             .navigationBarTitleDisplayMode(.large)
             .overlay(alignment: .bottomTrailing) {
