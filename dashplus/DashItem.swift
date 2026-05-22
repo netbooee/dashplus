@@ -13,6 +13,7 @@ final class DashItem {
     var assignedTo: String = ""
     var waitingFor: String = ""
     var delegatedAt: Date? = nil
+    var dueDate: Date? = nil
     var list: DashList?
 
     var symbol: ItemSymbol {

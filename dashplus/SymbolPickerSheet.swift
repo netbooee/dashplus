@@ -5,18 +5,24 @@ struct SymbolSelection {
     var symbol: ItemSymbol
     var assignedTo: String
     var waitingFor: String
-    var scheduledDate: Date
+    var scheduledDate: Date   // meeting date for .scheduledMeeting / .square
+    var startDate: Date?      // nil = today; non-nil moves item to that day
+    var dueDate: Date?        // nil = no due date; informational only
 
     init(
         symbol: ItemSymbol = .dash,
         assignedTo: String = "",
         waitingFor: String = "",
-        scheduledDate: Date = Date()
+        scheduledDate: Date = Date(),
+        startDate: Date? = nil,
+        dueDate: Date? = nil
     ) {
         self.symbol = symbol
         self.assignedTo = assignedTo
         self.waitingFor = waitingFor
         self.scheduledDate = scheduledDate
+        self.startDate = startDate
+        self.dueDate = dueDate
     }
 }
 
@@ -44,8 +50,15 @@ struct SymbolPickerSheet: View {
         self.onConfirm = onConfirm
     }
 
+    /// Symbols whose extra fields need a Done button (don't auto-dismiss on tap).
     private func needsFollowOn(_ sym: ItemSymbol) -> Bool {
         sym == .leftArrow || sym == .rightArrow || sym == .scheduledMeeting
+            || supportsScheduling(sym)
+    }
+
+    /// Task symbols that support optional start / due dates.
+    private func supportsScheduling(_ sym: ItemSymbol) -> Bool {
+        sym == .dash || sym == .triangle
     }
 
     var body: some View {
@@ -98,17 +111,23 @@ struct SymbolPickerSheet: View {
                     // Conditional extra fields
                     switch selection.symbol {
                     case .leftArrow:
-                        extraTextField(
-                            icon: "person",
-                            placeholder: "Delegate to…",
-                            text: $selection.assignedTo
-                        )
+                        VStack(spacing: 12) {
+                            extraTextField(
+                                icon: "person",
+                                placeholder: "Delegate to…",
+                                text: $selection.assignedTo
+                            )
+                            dateRows()
+                        }
                     case .rightArrow:
-                        extraTextField(
-                            icon: "arrow.right",
-                            placeholder: "Waiting for…",
-                            text: $selection.waitingFor
-                        )
+                        VStack(spacing: 12) {
+                            extraTextField(
+                                icon: "arrow.right",
+                                placeholder: "Waiting for…",
+                                text: $selection.waitingFor
+                            )
+                            dateRows()
+                        }
                     case .scheduledMeeting:
                         VStack(alignment: .leading, spacing: 6) {
                             Label("Meeting Date", systemImage: "calendar")
@@ -124,7 +143,9 @@ struct SymbolPickerSheet: View {
                             .padding(.horizontal)
                         }
                     default:
-                        EmptyView()
+                        if supportsScheduling(selection.symbol) {
+                            dateRows()
+                        }
                     }
                 }
                 .padding(.vertical)
@@ -155,6 +176,82 @@ struct SymbolPickerSheet: View {
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)
     }
+
+    // MARK: - Date helpers
+
+    private static var tomorrow: Date {
+        Calendar.current.date(byAdding: .day, value: 1,
+                              to: Calendar.current.startOfDay(for: Date())) ?? Date()
+    }
+    private static var nextWeek: Date {
+        Calendar.current.date(byAdding: .day, value: 7,
+                              to: Calendar.current.startOfDay(for: Date())) ?? Date()
+    }
+
+    @ViewBuilder
+    private func dateRows() -> some View {
+        VStack(spacing: 8) {
+            optionalDateRow(
+                label: "Start Date",
+                icon: "calendar",
+                date: $selection.startDate,
+                defaultDate: Self.tomorrow
+            )
+            optionalDateRow(
+                label: "Due Date",
+                icon: "calendar.badge.exclamationmark",
+                date: $selection.dueDate,
+                defaultDate: Self.nextWeek
+            )
+        }
+    }
+
+    @ViewBuilder
+    private func optionalDateRow(
+        label: String, icon: String,
+        date: Binding<Date?>, defaultDate: Date
+    ) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .foregroundStyle(.secondary)
+                .frame(width: 20)
+            Text(label)
+                .font(.subheadline)
+                .foregroundStyle(.primary)
+            Spacer()
+            if date.wrappedValue != nil {
+                DatePicker(
+                    "",
+                    selection: Binding(
+                        get: { date.wrappedValue ?? defaultDate },
+                        set: { date.wrappedValue = $0 }
+                    ),
+                    displayedComponents: [.date]
+                )
+                .labelsHidden()
+                .datePickerStyle(.compact)
+                Button {
+                    date.wrappedValue = nil
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundStyle(.quaternary)
+                        .font(.title3)
+                }
+            } else {
+                Button("Add") {
+                    date.wrappedValue = defaultDate
+                }
+                .font(.subheadline)
+                .foregroundStyle(Color.appAccent)
+            }
+        }
+        .padding(14)
+        .background(Color(.secondarySystemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .padding(.horizontal)
+    }
+
+    // MARK: - Text field helper
 
     @ViewBuilder
     private func extraTextField(icon: String, placeholder: String, text: Binding<String>) -> some View {

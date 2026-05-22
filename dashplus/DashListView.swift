@@ -73,7 +73,7 @@ struct DashListView: View {
                 groupHeader(title: group.title, symbol: group.symbol, count: group.items.count)
 
                 ForEach(group.items) { item in
-                    DashItemRow(item: item, showPrefix: false)
+                    DashItemRow(item: item, showPrefix: false, showDate: true)
                 }
                 .onDelete { offsets in
                     for i in offsets { modelContext.delete(group.items[i]) }

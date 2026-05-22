@@ -90,16 +90,31 @@ struct DashItemRow: View {
                     symbol: item.symbol,
                     assignedTo: item.assignedTo,
                     waitingFor: item.waitingFor,
-                    scheduledDate: item.scheduledDate
+                    scheduledDate: item.scheduledDate,
+                    startDate: {
+                        // Only expose an explicit start date if it's in the future
+                        let today = Calendar.current.startOfDay(for: Date())
+                        let itemDay = Calendar.current.startOfDay(for: item.scheduledDate)
+                        return itemDay > today ? item.scheduledDate : nil
+                    }(),
+                    dueDate: item.dueDate
                 ),
                 currentListID: item.list?.id,
                 onMoveToList: { list in item.list = list }
             ) { result in
                 let wasLeftArrow = item.symbol == .leftArrow
-                item.symbol        = result.symbol
-                item.assignedTo    = result.assignedTo
-                item.waitingFor    = result.waitingFor
-                item.scheduledDate = result.scheduledDate
+                item.symbol     = result.symbol
+                item.assignedTo = result.assignedTo
+                item.waitingFor = result.waitingFor
+                item.dueDate    = result.dueDate
+                // Meetings use scheduledDate directly; tasks use startDate (nil = today)
+                if result.symbol == .scheduledMeeting || result.symbol == .square {
+                    item.scheduledDate = result.scheduledDate
+                } else {
+                    item.scheduledDate = result.startDate.map {
+                        Calendar.current.startOfDay(for: $0)
+                    } ?? Calendar.current.startOfDay(for: Date())
+                }
                 if result.symbol == .leftArrow && !wasLeftArrow {
                     item.delegatedAt = Date()
                 } else if result.symbol != .leftArrow {
@@ -130,7 +145,7 @@ struct DashItemRow: View {
             let age  = item.delegatedAt.map {
                 Self.relativeDateFormatter.localizedString(for: $0, relativeTo: Date())
             }
-            let combined: String? = {
+            let base: String? = {
                 switch (name, age) {
                 case (let n?, let a?): return "\(n) · \(a)"
                 case (let n?, nil):    return n
@@ -138,20 +153,31 @@ struct DashItemRow: View {
                 default:               return nil
                 }
             }()
-            return combined ?? dateContext
+            return combine(base ?? dateContext, dueDateString)
 
         case .rightArrow where !item.waitingFor.isEmpty:
-            return "→\(item.waitingFor)"
+            return combine("→\(item.waitingFor)", dueDateString)
 
         case .scheduledMeeting:
+            // Meeting date is authoritative; no start/due overlay
             return Self.meetingDateFormatter.string(from: item.scheduledDate)
 
         default:
-            return dateContext
+            return combine(dateContext, dueDateString)
         }
     }
 
-    /// Friendly date label shown when `showDate` is true and no other annotation applies.
+    /// Combines two optional strings with " · " separator.
+    private func combine(_ a: String?, _ b: String?) -> String? {
+        switch (a, b) {
+        case (let x?, let y?): return "\(x) · \(y)"
+        case (let x?, nil):    return x
+        case (nil, let y?):    return y
+        default:               return nil
+        }
+    }
+
+    /// Start-date label shown when `showDate` is true.
     private var dateContext: String? {
         guard showDate else { return nil }
         let cal = Calendar.current
@@ -164,6 +190,24 @@ struct DashItemRow: View {
         case 2...6:  return Self.dayFormatter.string(from: item.scheduledDate)
         default:     return Self.shortDateFormatter.string(from: item.scheduledDate)
         }
+    }
+
+    /// Due-date label — always shown when a due date is set, regardless of `showDate`.
+    private var dueDateString: String? {
+        guard let due = item.dueDate else { return nil }
+        let cal = Calendar.current
+        let today  = cal.startOfDay(for: Date())
+        let dueDay = cal.startOfDay(for: due)
+        let diff   = cal.dateComponents([.day], from: today, to: dueDay).day ?? 0
+        let label: String
+        switch diff {
+        case ..<0:   label = "overdue"
+        case 0:      label = "today"
+        case 1:      label = "tomorrow"
+        case 2...6:  label = Self.dayFormatter.string(from: due)
+        default:     label = Self.shortDateFormatter.string(from: due)
+        }
+        return "Due \(label)"
     }
 
     // MARK: - Formatters

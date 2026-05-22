@@ -107,7 +107,14 @@ struct AddItemView: View {
         )
         item.assignedTo = selection.assignedTo
         item.waitingFor = selection.waitingFor
-        item.scheduledDate = selection.symbol == .scheduledMeeting ? selection.scheduledDate : Date()
+        item.dueDate    = selection.dueDate
+        if selection.symbol == .scheduledMeeting || selection.symbol == .square {
+            item.scheduledDate = selection.scheduledDate
+        } else {
+            item.scheduledDate = selection.startDate.map {
+                Calendar.current.startOfDay(for: $0)
+            } ?? Calendar.current.startOfDay(for: Date())
+        }
         item.delegatedAt = selection.symbol == .leftArrow ? Date() : nil
         item.list = list
         modelContext.insert(item)
