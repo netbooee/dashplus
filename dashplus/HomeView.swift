@@ -40,17 +40,17 @@ fileprivate struct HomeDayRowView: View {
                     .frame(width: 16)
                 Text(title)
                     .font(.caption.weight(.semibold))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(symbol.color)
                     .textCase(.uppercase)
                 Spacer()
                 Text("\(count)")
                     .font(.caption.weight(.medium))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(symbol.color)
                     .monospacedDigit()
             }
             .listRowSeparator(.hidden)
             .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
-            .listRowBackground(Color.warmBg)
+            .listRowBackground(symbol.color.opacity(0.12))
 
         case .dashItem(let item, let isOverdue):
             DashItemRow(item: item, isOverdue: isOverdue)
