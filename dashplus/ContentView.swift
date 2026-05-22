@@ -7,6 +7,8 @@ struct ContentView: View {
                 .tabItem { Label("All Items", systemImage: "list.bullet") }
             ListsView()
                 .tabItem { Label("Projects", systemImage: "folder") }
+            KPIView()
+                .tabItem { Label("Dashboard", systemImage: "chart.bar.xaxis") }
             PeopleView()
                 .tabItem { Label("People", systemImage: "person.2") }
             NotesView()

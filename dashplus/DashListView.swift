@@ -30,6 +30,8 @@ struct DashListView: View {
         ("Meetings Scheduled",       [.scheduledMeeting]),
         ("Delegated",                [.leftArrow]),
         ("Waiting For",              [.rightArrow]),
+        ("Notes",                    [.triangle]),
+        ("People",                   [.person]),
     ]
 
     // MARK: Computed item lists
