@@ -130,12 +130,12 @@ struct ListsView: View {
                             .buttonStyle(.plain)
                             .contextMenu {
                                 Button { editingList = list } label: {
-                                    Label("Edit List", systemImage: "pencil")
+                                    Label("Edit Project", systemImage: "pencil")
                                 }
                                 Button(role: .destructive) {
                                     modelContext.delete(list)
                                 } label: {
-                                    Label("Delete List", systemImage: "trash")
+                                    Label("Delete Project", systemImage: "trash")
                                 }
                             }
 
@@ -154,15 +154,15 @@ struct ListsView: View {
                 }
             }
             .listStyle(.insetGrouped)
-            .navigationTitle("Lists")
+            .navigationTitle("Projects")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Menu {
                         Button { showingNewList = true } label: {
-                            Label("New List", systemImage: "plus")
+                            Label("New Project", systemImage: "plus")
                         }
                         Button { showingImporter = true } label: {
-                            Label("Import as New List", systemImage: "square.and.arrow.down")
+                            Label("Import as New Project", systemImage: "square.and.arrow.down")
                         }
                     } label: {
                         Image(systemName: "ellipsis.circle")
@@ -190,9 +190,9 @@ struct ListsView: View {
             .overlay {
                 if lists.isEmpty {
                     ContentUnavailableView(
-                        "No Lists",
+                        "No Projects",
                         systemImage: "folder",
-                        description: Text("Tap + to create your first list")
+                        description: Text("Tap + to create your first project")
                     )
                 }
             }

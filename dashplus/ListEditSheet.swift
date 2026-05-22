@@ -38,12 +38,12 @@ struct ListEditSheet: View {
                             .foregroundStyle(.secondary)
                     }
                 } header: {
-                    Text("List Details")
+                    Text("Project Details")
                 } footer: {
-                    Text("The prefix appears before every item in this list.")
+                    Text("The prefix appears before every item in this project.")
                 }
             }
-            .navigationTitle(isCreating ? "New List" : "Edit List")
+            .navigationTitle(isCreating ? "New Project" : "Edit Project")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

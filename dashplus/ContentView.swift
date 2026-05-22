@@ -6,7 +6,7 @@ struct ContentView: View {
             HomeView()
                 .tabItem { Label("All Items", systemImage: "list.bullet") }
             ListsView()
-                .tabItem { Label("Lists", systemImage: "folder") }
+                .tabItem { Label("Projects", systemImage: "folder") }
             PeopleView()
                 .tabItem { Label("People", systemImage: "person.2") }
             NotesView()
