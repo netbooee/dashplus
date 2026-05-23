@@ -35,7 +35,7 @@ enum ItemSymbol: String, CaseIterable, Codable {
         case .leftArrow:        return .blue
         case .triangle:         return .purple
         case .circle:           return .gray
-        case .square:           return .pink
+        case .square:           return .brown
         case .scheduledMeeting: return .teal
         case .person:           return .cyan
         case .someday:          return .indigo
@@ -70,6 +70,14 @@ enum ItemSymbol: String, CaseIterable, Codable {
         case "P":   return .person
         case "~":   return .someday
         default:    return nil
+        }
+    }
+
+    /// True for symbols that support optional start / due date scheduling.
+    var supportsDateScheduling: Bool {
+        switch self {
+        case .dash, .leftArrow, .rightArrow, .triangle: return true
+        default: return false
         }
     }
 

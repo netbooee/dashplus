@@ -9,12 +9,12 @@ struct PrefixChip: View {
     var body: some View {
         if !prefix.isEmpty {
             Text(prefix)
-                .font(.system(size: large ? 11 : 8, weight: .semibold, design: .monospaced))
+                .font(.system(size: large ? 11 : 10, weight: .semibold, design: .monospaced))
                 .foregroundStyle(Color.appAccent)
-                .padding(.horizontal, large ? 6 : 4)
-                .padding(.vertical, large ? 2 : 1)
+                .padding(.horizontal, large ? 6 : 5)
+                .padding(.vertical, large ? 2 : 2)
                 .overlay {
-                    RoundedRectangle(cornerRadius: large ? 5 : 3)
+                    RoundedRectangle(cornerRadius: large ? 5 : 4)
                         .stroke(Color.appAccent, lineWidth: 1)
                 }
         }
