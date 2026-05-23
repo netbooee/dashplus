@@ -35,7 +35,7 @@ enum ItemSymbol: String, CaseIterable, Codable {
         case .leftArrow:        return .blue
         case .triangle:         return .purple
         case .circle:           return .gray
-        case .square:           return .red
+        case .square:           return .pink
         case .scheduledMeeting: return .teal
         case .person:           return .cyan
         case .someday:          return .indigo

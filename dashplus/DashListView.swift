@@ -121,11 +121,19 @@ struct DashListView: View {
                 }
             }
 
-            InlineAddItemRow(list: list)
         }
         .listStyle(.insetGrouped)
         .scrollContentBackground(.hidden)
         .background(Color.warmBg)
+        .safeAreaInset(edge: .bottom) {
+            VStack(spacing: 0) {
+                Divider()
+                InlineAddItemRow(list: list)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(Color(UIColor.systemBackground))
+            }
+        }
         .navigationTitle(list.prefix.isEmpty ? list.name : "\(list.prefix) · \(list.name)")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {

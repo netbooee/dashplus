@@ -9,6 +9,7 @@ struct QuickEntrySheet: View {
     @State private var selectedListID: UUID?
     @State private var selectedSymbol: ItemSymbol = .dash
     @State private var text = ""
+    @State private var showingNewProject = false
     @FocusState private var textFocused: Bool
 
     private var sortedLists: [DashList] {
@@ -17,13 +18,30 @@ struct QuickEntrySheet: View {
         return gen + rest
     }
 
+    private let symbolColumns = Array(repeating: GridItem(.flexible(), spacing: 10), count: 5)
+
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 0) {
 
-                // List prefix pills
+                // Project pills
                 ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 8) {
+                    HStack(spacing: 10) {
+                        // New project button
+                        Button { showingNewProject = true } label: {
+                            Image(systemName: "plus")
+                                .font(.system(size: 15, weight: .semibold))
+                                .foregroundStyle(Color.appAccent)
+                                .frame(width: 44, height: 44)
+                                .background(Color.appAccent.opacity(0.12))
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .overlay {
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(Color.appAccent.opacity(0.3), lineWidth: 1)
+                                }
+                        }
+                        .buttonStyle(.plain)
+
                         ForEach(sortedLists) { list in
                             let label = list.prefix.isEmpty ? list.name : list.prefix
                             PrefixPill(label: label, isSelected: selectedListID == list.id) {
@@ -32,42 +50,41 @@ struct QuickEntrySheet: View {
                         }
                     }
                     .padding(.horizontal, 16)
-                    .padding(.vertical, 10)
+                    .padding(.vertical, 12)
                 }
                 .background(Color(.secondarySystemBackground))
 
                 Divider()
 
-                // Symbol chips
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 8) {
-                        ForEach(ItemSymbol.allCases, id: \.self) { symbol in
-                            SymbolChip(symbol: symbol, isSelected: selectedSymbol == symbol) {
-                                selectedSymbol = symbol
-                            }
+                // Symbol grid — 2 rows of 5
+                LazyVGrid(columns: symbolColumns, spacing: 10) {
+                    ForEach(ItemSymbol.allCases, id: \.self) { symbol in
+                        LargeSymbolChip(symbol: symbol, isSelected: selectedSymbol == symbol) {
+                            selectedSymbol = symbol
                         }
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 10)
                 }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
                 .background(Color(.secondarySystemBackground))
 
                 Divider()
 
-                // Entry row
+                // Text entry — two visible rows
                 HStack(alignment: .top, spacing: 12) {
                     Image(systemName: selectedSymbol.systemImageName)
                         .foregroundStyle(selectedSymbol.color)
-                        .font(.system(size: 16, weight: .semibold))
-                        .frame(width: 24, height: 24)
-                        .padding(.top, 3)
+                        .font(.system(size: 18, weight: .semibold))
+                        .frame(width: 26, height: 26)
+                        .padding(.top, 2)
                         .animation(.easeInOut(duration: 0.15), value: selectedSymbol)
 
-                    TextField("What needs to be done?", text: $text, axis: .vertical)
+                    TextField("What happens next?", text: $text, axis: .vertical)
                         .font(.system(.body, design: .monospaced))
                         .focused($textFocused)
-                        .lineLimit(1...5)
+                        .lineLimit(2...6)
                         .submitLabel(.done)
+                        .frame(minHeight: 52, alignment: .topLeading)
                 }
                 .padding(16)
 
@@ -90,8 +107,11 @@ struct QuickEntrySheet: View {
                 textFocused = true
             }
         }
-        .presentationDetents([.medium])
+        .presentationDetents([.large])
         .presentationDragIndicator(.visible)
+        .sheet(isPresented: $showingNewProject) {
+            ListEditSheet()
+        }
     }
 
     private func addItem() {
@@ -138,6 +158,33 @@ struct SymbolChip: View {
     }
 }
 
+struct LargeSymbolChip: View {
+    let symbol: ItemSymbol
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 4) {
+                Image(systemName: symbol.systemImageName)
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundStyle(isSelected ? .white : symbol.color)
+                Text(symbol.label)
+                    .font(.system(size: 8, weight: .medium))
+                    .foregroundStyle(isSelected ? .white.opacity(0.9) : symbol.color)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 10)
+            .background(isSelected ? symbol.color : symbol.color.opacity(0.12))
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+        }
+        .buttonStyle(.plain)
+        .animation(.easeInOut(duration: 0.15), value: isSelected)
+    }
+}
+
 struct PrefixPill: View {
     let label: String
     let isSelected: Bool
@@ -147,9 +194,9 @@ struct PrefixPill: View {
         Button(action: action) {
             Text(label)
                 .font(.system(.subheadline, design: .monospaced, weight: .semibold))
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
-                .background(isSelected ? Color.blue : Color(.tertiarySystemFill))
+                .padding(.horizontal, 18)
+                .padding(.vertical, 12)
+                .background(isSelected ? Color.appAccent : Color(.tertiarySystemFill))
                 .foregroundStyle(isSelected ? .white : .primary)
                 .clipShape(Capsule())
         }

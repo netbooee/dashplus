@@ -29,11 +29,11 @@ struct ListEditSheet: View {
                             .autocorrectionDisabled()
                             .font(.system(.body, design: .monospaced, weight: .semibold))
                             .onChange(of: prefix) { _, new in
-                                let cleaned = String(new.uppercased().filter { $0.isLetter }.prefix(3))
+                                let cleaned = String(new.uppercased().filter { $0.isLetter || $0.isNumber }.prefix(4))
                                 if cleaned != prefix { prefix = cleaned }
                             }
                         Spacer()
-                        Text("3 letters, e.g. IBS")
+                        Text("Up to 4 chars, e.g. 3DP")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
