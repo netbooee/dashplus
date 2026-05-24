@@ -18,7 +18,7 @@ struct InlineAddItemRow: View {
                     .frame(width: 24, height: 24)
                     .padding(.top, 1)
 
-                TextField("Add item…", text: $text)
+                TextField("What happens next?", text: $text)
                     .font(.system(.subheadline, design: .monospaced))
                     .foregroundStyle(.primary)
                     .focused($isFocused)

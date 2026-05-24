@@ -115,7 +115,7 @@ struct DashListView: View {
 
                 if !completedCollapsed {
                     ForEach(completedItems) { item in
-                        DashItemRow(item: item, isCompact: true, showPrefix: false)
+                        DashItemRow(item: item, showPrefix: false)
                     }
                     .onDelete(perform: deleteCompleted)
                 }

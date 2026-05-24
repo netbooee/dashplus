@@ -91,12 +91,7 @@ struct DashItemRow: View {
                     assignedTo: item.assignedTo,
                     waitingFor: item.waitingFor,
                     scheduledDate: item.scheduledDate,
-                    startDate: {
-                        // Only expose an explicit start date if it's in the future
-                        let today = Calendar.current.startOfDay(for: Date())
-                        let itemDay = Calendar.current.startOfDay(for: item.scheduledDate)
-                        return itemDay > today ? item.scheduledDate : nil
-                    }(),
+                    startDate: item.startDate,
                     dueDate: item.dueDate
                 ),
                 currentListID: item.list?.id,
@@ -106,6 +101,7 @@ struct DashItemRow: View {
                 item.symbol     = result.symbol
                 item.assignedTo = result.assignedTo
                 item.waitingFor = result.waitingFor
+                item.startDate  = result.startDate
                 item.dueDate    = result.dueDate
                 // Meetings use scheduledDate directly; tasks use startDate (nil = today)
                 if result.symbol == .scheduledMeeting || result.symbol == .square {
@@ -177,19 +173,22 @@ struct DashItemRow: View {
         }
     }
 
-    /// Start-date label shown when `showDate` is true.
+    /// Start-date label — only shown when an explicit start date was set.
     private var dateContext: String? {
-        guard showDate else { return nil }
+        guard showDate, let start = item.startDate else { return nil }
         let cal = Calendar.current
-        let today    = cal.startOfDay(for: Date())
-        let itemDay  = cal.startOfDay(for: item.scheduledDate)
-        let diff     = cal.dateComponents([.day], from: today, to: itemDay).day ?? 0
+        let today   = cal.startOfDay(for: Date())
+        let startDay = cal.startOfDay(for: start)
+        let diff    = cal.dateComponents([.day], from: today, to: startDay).day ?? 0
+        let label: String
         switch diff {
-        case 0:      return "Today"
-        case 1:      return "Tomorrow"
-        case 2...6:  return Self.dayFormatter.string(from: item.scheduledDate)
-        default:     return Self.shortDateFormatter.string(from: item.scheduledDate)
+        case ..<0:   label = "overdue"
+        case 0:      label = "today"
+        case 1:      label = "tomorrow"
+        case 2...6:  label = Self.dayFormatter.string(from: start)
+        default:     label = Self.shortDateFormatter.string(from: start)
         }
+        return "Start \(label)"
     }
 
     /// Due-date label — always shown when a due date is set, regardless of `showDate`.

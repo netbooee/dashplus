@@ -1,12 +1,12 @@
 import SwiftUI
 
 struct ContentView: View {
-    @AppStorage("resido.hasSeenOnboarding") private var hasSeenOnboarding = false
+    @AppStorage("happensnext.hasSeenOnboarding") private var hasSeenOnboarding = false
 
     var body: some View {
         TabView {
             HomeView()
-                .tabItem { Label("ResiDo", systemImage: "list.bullet") }
+                .tabItem { Label("HappensNext", systemImage: "list.bullet") }
             ListsView()
                 .tabItem { Label("Projects", systemImage: "folder") }
             KPIView()

@@ -56,7 +56,7 @@ private struct WelcomePage: View {
                 .shadow(color: Color.appAccent.opacity(0.4), radius: 16, x: 0, y: 8)
 
                 VStack(spacing: 8) {
-                    Text("Welcome to ResiDo")
+                    Text("Welcome to HappensNext")
                         .font(.largeTitle.weight(.bold))
                         .multilineTextAlignment(.center)
                     Text("A symbol-based system for capturing everything — tasks, meetings, notes, ideas — and always knowing your next action.")

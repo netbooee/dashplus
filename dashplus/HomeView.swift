@@ -116,7 +116,10 @@ struct HomeView: View {
             rows.append(.groupHeader(title: group.title, symbol: group.symbols.first!,
                                      count: filtered.count, uid: uid))
             for item in filtered {
-                rows.append(.dashItem(item, isOverdue: calendar.startOfDay(for: item.scheduledDate) < todayStart))
+                // Overdue only when an explicit start or due date was set and has passed
+                let startDateOverdue = item.startDate.map { calendar.startOfDay(for: $0) < todayStart } ?? false
+                let dueDateOverdue   = item.dueDate.map { calendar.startOfDay(for: $0) < todayStart } ?? false
+                rows.append(.dashItem(item, isOverdue: startDateOverdue || dueDateOverdue))
             }
         }
         return rows
@@ -173,7 +176,7 @@ struct HomeView: View {
             .listStyle(.insetGrouped)
             .scrollContentBackground(.hidden)
             .background(Color.warmBg)
-            .navigationTitle("ResiDo")
+            .navigationTitle("HappensNext")
             .navigationBarTitleDisplayMode(.large)
             .overlay(alignment: .bottomTrailing) {
                 Button { showingQuickEntry = true } label: {

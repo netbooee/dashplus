@@ -187,6 +187,7 @@ struct AddItemView: View {
                             text: trimmed, sortOrder: list.itemList.count)
         item.assignedTo = selection.assignedTo
         item.waitingFor = selection.waitingFor
+        item.startDate  = selection.startDate
         item.dueDate    = selection.dueDate
         if selection.symbol == .scheduledMeeting || selection.symbol == .square {
             item.scheduledDate = selection.scheduledDate
