@@ -156,7 +156,7 @@ struct DashItemRow: View {
 
         case .scheduledMeeting:
             // Meeting date is authoritative; no start/due overlay
-            return Self.meetingDateFormatter.string(from: item.scheduledDate)
+            return "Scheduled \(Self.meetingDateFormatter.string(from: item.scheduledDate))"
 
         default:
             return combine(dateContext, dueDateString)

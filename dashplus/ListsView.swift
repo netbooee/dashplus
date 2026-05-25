@@ -28,27 +28,6 @@ private struct ProjectTile: View {
     }
 }
 
-private struct NewProjectTile: View {
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Image(systemName: "plus")
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundStyle(Color.appAccent)
-            Text("New Project")
-                .font(.headline)
-                .foregroundStyle(Color.appAccent)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(14)
-        .background(Color.appAccent.opacity(0.06))
-        .clipShape(RoundedRectangle(cornerRadius: 14))
-        .overlay {
-            RoundedRectangle(cornerRadius: 14)
-                .stroke(Color.appAccent.opacity(0.3), lineWidth: 1.5)
-        }
-    }
-}
-
 // MARK: - ListsView
 
 struct ListsView: View {
@@ -96,11 +75,6 @@ struct ListsView: View {
                                 }
                             }
                         }
-
-                        Button { showingNewList = true } label: {
-                            NewProjectTile()
-                        }
-                        .buttonStyle(.plain)
                     }
                     .padding(16)
                 }
@@ -109,16 +83,14 @@ struct ListsView: View {
             .navigationTitle("Projects")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button { showingNewList = true } label: {
+                        Label("New Project", systemImage: "plus")
+                    }
+                }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Menu {
-                        Button { showingNewList = true } label: {
-                            Label("New Project", systemImage: "plus")
-                        }
-                        Button { showingImporter = true } label: {
-                            Label("Import as New Project", systemImage: "square.and.arrow.down")
-                        }
-                    } label: {
-                        Image(systemName: "ellipsis.circle")
+                    Button { showingImporter = true } label: {
+                        Image(systemName: "square.and.arrow.down")
                     }
                 }
             }

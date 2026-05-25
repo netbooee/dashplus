@@ -57,12 +57,26 @@ struct KPIDetailView: View {
         )
     }
 
+    /// Groups items by project name, sorted alphabetically — used for the Completed view.
+    private var groupedByProject: [(name: String, items: [DashItem])] {
+        let grouped = Dictionary(grouping: items) { $0.list?.name ?? "No Project" }
+        return grouped.sorted { $0.key < $1.key }.map { (name: $0.key, items: $0.value) }
+    }
+
     var body: some View {
         List {
             if items.isEmpty {
                 Text("No items")
                     .foregroundStyle(.tertiary)
                     .listRowBackground(Color.clear)
+            } else if symbol == .plus {
+                ForEach(groupedByProject, id: \.name) { group in
+                    Section(group.name) {
+                        ForEach(group.items) { item in
+                            DashItemRow(item: item, showPrefix: false)
+                        }
+                    }
+                }
             } else {
                 ForEach(items) { item in
                     DashItemRow(item: item, showDate: true)

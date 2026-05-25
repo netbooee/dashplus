@@ -30,6 +30,8 @@
 		DA5800010000000000000EEA /* PrefixChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5800010000000000000EE9 /* PrefixChip.swift */; };
 		DA5800010000000000000FFB /* KPIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5800010000000000000FFA /* KPIView.swift */; };
 		DA580001000000000000100B /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA580001000000000000100A /* OnboardingView.swift */; };
+		DA580001000000000000100D /* AIItemExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA580001000000000000100C /* AIItemExtractor.swift */; };
+		DA580001000000000000100F /* NoteProcessorSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA580001000000000000100E /* NoteProcessorSheet.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -58,6 +60,8 @@
 		DA5800010000000000000EE9 /* PrefixChip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrefixChip.swift; sourceTree = "<group>"; };
 		DA5800010000000000000FFA /* KPIView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KPIView.swift; sourceTree = "<group>"; };
 		DA580001000000000000100A /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		DA580001000000000000100C /* AIItemExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIItemExtractor.swift; sourceTree = "<group>"; };
+		DA580001000000000000100E /* NoteProcessorSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteProcessorSheet.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -95,6 +99,8 @@
 				DA5800010000000000000EE9 /* PrefixChip.swift */,
 				DA5800010000000000000FFA /* KPIView.swift */,
 				DA580001000000000000100A /* OnboardingView.swift */,
+				DA580001000000000000100C /* AIItemExtractor.swift */,
+				DA580001000000000000100E /* NoteProcessorSheet.swift */,
 				DA580001000000000000003D /* Assets.xcassets */,
 				DA580001000000000000005E /* Preview Content */,
 				DA580001000000000000005F /* dashplus.entitlements */,
@@ -217,6 +223,8 @@
 				DA5800010000000000000EEA /* PrefixChip.swift in Sources */,
 				DA5800010000000000000FFB /* KPIView.swift in Sources */,
 				DA580001000000000000100B /* OnboardingView.swift in Sources */,
+				DA580001000000000000100D /* AIItemExtractor.swift in Sources */,
+				DA580001000000000000100F /* NoteProcessorSheet.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -350,6 +358,8 @@
 				DEVELOPMENT_TEAM = GB8H6683BF;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = HappensNext;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "HappensNext uses your microphone to transcribe spoken notes into tasks.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "HappensNext uses speech recognition to convert your voice into text for task creation.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -378,6 +388,8 @@
 				DEVELOPMENT_TEAM = GB8H6683BF;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = HappensNext;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "HappensNext uses your microphone to transcribe spoken notes into tasks.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "HappensNext uses speech recognition to convert your voice into text for task creation.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

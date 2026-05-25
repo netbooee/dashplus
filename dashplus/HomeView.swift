@@ -65,6 +65,7 @@ struct HomeView: View {
     @Query(sort: \DashItem.scheduledDate, order: .forward) private var allItems: [DashItem]
     @Query private var lists: [DashList]
     @State private var showingQuickEntry = false
+    @State private var showingNoteProcessor = false
     @State private var collapsedSections: Set<Date> = []
 
     // MARK: Symbol groups (order matters)
@@ -188,8 +189,20 @@ struct HomeView: View {
                 }
                 .padding(20)
             }
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button { showingNoteProcessor = true } label: {
+                        Image(systemName: "mic.circle")
+                            .font(.system(size: 20))
+                            .foregroundStyle(Color.appAccent)
+                    }
+                }
+            }
             .sheet(isPresented: $showingQuickEntry) {
                 QuickEntrySheet()
+            }
+            .sheet(isPresented: $showingNoteProcessor) {
+                NoteProcessorSheet()
             }
             .task { ensureGENExists() }
         }
