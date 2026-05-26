@@ -82,6 +82,7 @@ struct HomeView: View {
     @Query private var lists: [DashList]
     @State private var showingQuickEntry = false
     @State private var showingNoteProcessor = false
+    @State private var showingSettings = false
     @State private var collapsedSections: Set<Date> = []
 
     // MARK: Symbol groups (order matters)
@@ -206,6 +207,13 @@ struct HomeView: View {
                 .padding(20)
             }
             .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button { showingSettings = true } label: {
+                        Image(systemName: "gearshape")
+                            .font(.system(size: 18))
+                            .foregroundStyle(.secondary)
+                    }
+                }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button { showingNoteProcessor = true } label: {
                         Image(systemName: "mic.circle")
@@ -219,6 +227,9 @@ struct HomeView: View {
             }
             .sheet(isPresented: $showingNoteProcessor) {
                 NoteProcessorSheet()
+            }
+            .sheet(isPresented: $showingSettings) {
+                SettingsView()
             }
             .task { ensureGENExists() }
         }

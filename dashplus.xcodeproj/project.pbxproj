@@ -32,6 +32,8 @@
 		DA580001000000000000100B /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA580001000000000000100A /* OnboardingView.swift */; };
 		DA580001000000000000100D /* AIItemExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA580001000000000000100C /* AIItemExtractor.swift */; };
 		DA580001000000000000100F /* NoteProcessorSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA580001000000000000100E /* NoteProcessorSheet.swift */; };
+		DA580001000000000000101B /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA580001000000000000101A /* SettingsView.swift */; };
+		DA580001000000000000101D /* SampleDataSeeder.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA580001000000000000101C /* SampleDataSeeder.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -62,6 +64,8 @@
 		DA580001000000000000100A /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		DA580001000000000000100C /* AIItemExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIItemExtractor.swift; sourceTree = "<group>"; };
 		DA580001000000000000100E /* NoteProcessorSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteProcessorSheet.swift; sourceTree = "<group>"; };
+		DA580001000000000000101A /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		DA580001000000000000101C /* SampleDataSeeder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleDataSeeder.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -101,6 +105,8 @@
 				DA580001000000000000100A /* OnboardingView.swift */,
 				DA580001000000000000100C /* AIItemExtractor.swift */,
 				DA580001000000000000100E /* NoteProcessorSheet.swift */,
+				DA580001000000000000101A /* SettingsView.swift */,
+				DA580001000000000000101C /* SampleDataSeeder.swift */,
 				DA580001000000000000003D /* Assets.xcassets */,
 				DA580001000000000000005E /* Preview Content */,
 				DA580001000000000000005F /* dashplus.entitlements */,
@@ -225,6 +231,8 @@
 				DA580001000000000000100B /* OnboardingView.swift in Sources */,
 				DA580001000000000000100D /* AIItemExtractor.swift in Sources */,
 				DA580001000000000000100F /* NoteProcessorSheet.swift in Sources */,
+				DA580001000000000000101B /* SettingsView.swift in Sources */,
+				DA580001000000000000101D /* SampleDataSeeder.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

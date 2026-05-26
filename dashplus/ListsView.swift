@@ -5,8 +5,14 @@ import SwiftData
 
 private struct ProjectTile: View {
     let list: DashList
+
+    private var todoCount: Int      { list.itemList.filter { $0.symbol == .dash }.count }
+    private var scheduleCount: Int  { list.itemList.filter { $0.symbol == .square }.count }
+    private var delegatedCount: Int { list.itemList.filter { $0.symbol == .leftArrow }.count }
+    private var waitingCount: Int   { list.itemList.filter { $0.symbol == .rightArrow }.count }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .top) {
                 PrefixChip(prefix: list.prefix, large: true)
                 Spacer()
@@ -20,11 +26,33 @@ private struct ProjectTile: View {
                 .foregroundStyle(.primary)
                 .lineLimit(2)
                 .multilineTextAlignment(.leading)
+
+            // Activity summary — only visible symbols with count > 0
+            HStack(spacing: 8) {
+                statBadge("minus",       count: todoCount,      color: ItemSymbol.dash.color)
+                statBadge("square",      count: scheduleCount,  color: ItemSymbol.square.color)
+                statBadge("arrow.left",  count: delegatedCount, color: ItemSymbol.leftArrow.color)
+                statBadge("arrow.right", count: waitingCount,   color: ItemSymbol.rightArrow.color)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
         .background(Color(UIColor.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 14))
+    }
+
+    @ViewBuilder
+    private func statBadge(_ icon: String, count: Int, color: Color) -> some View {
+        if count > 0 {
+            HStack(spacing: 2) {
+                Image(systemName: icon)
+                    .font(.system(size: 8, weight: .bold))
+                Text("\(count)")
+                    .font(.system(size: 9, weight: .semibold))
+                    .monospacedDigit()
+            }
+            .foregroundStyle(color)
+        }
     }
 }
 
@@ -32,7 +60,7 @@ private struct ProjectTile: View {
 
 struct ListsView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query(sort: \DashList.createdAt) private var lists: [DashList]
+    @Query(sort: \DashList.name) private var lists: [DashList]
     @State private var showingNewList = false
     @State private var editingList: DashList?
     @State private var showingImporter = false
