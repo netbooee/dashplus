@@ -19,8 +19,19 @@ struct ContentView: View {
                 .tabItem { Label("Notes", systemImage: "triangle") }
         }
         .fullScreenCover(isPresented: .constant(!hasSeenOnboarding)) {
-            OnboardingView { hasSeenOnboarding = true }
+            OnboardingView {
+                hasSeenOnboarding = true
+                // Unlock tips the moment onboarding is dismissed for the first time.
+                DeleteItemTip.unlockAfterOnboarding()
+            }
         }
-        .task { SampleDataSeeder.seedIfNeeded(context: modelContext) }
+        .task {
+            SampleDataSeeder.seedIfNeeded(context: modelContext)
+            // Returning users who already completed onboarding before tips were
+            // introduced need the gate opened on every cold launch.
+            if hasSeenOnboarding {
+                DeleteItemTip.unlockAfterOnboarding()
+            }
+        }
     }
 }

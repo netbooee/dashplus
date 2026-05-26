@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import TipKit
 
 // MARK: - Tile sub-views
 
@@ -67,6 +68,41 @@ struct ListsView: View {
     @State private var importError: String?
 
     private let columns = [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)]
+    private let manageProjectTip = ManageProjectTip()
+
+    // MARK: Tip helper — attaches popover only to the first project tile.
+    @ViewBuilder
+    private func tileView(for list: DashList) -> some View {
+        let isFirst = list.id == lists.first?.id
+        if isFirst {
+            NavigationLink(destination: DashListView(list: list)) {
+                ProjectTile(list: list)
+            }
+            .buttonStyle(.plain)
+            .contextMenu {
+                Button { editingList = list } label: {
+                    Label("Edit Project", systemImage: "pencil")
+                }
+                Button(role: .destructive) { modelContext.delete(list) } label: {
+                    Label("Delete Project", systemImage: "trash")
+                }
+            }
+            .popoverTip(manageProjectTip, arrowEdge: .bottom)
+        } else {
+            NavigationLink(destination: DashListView(list: list)) {
+                ProjectTile(list: list)
+            }
+            .buttonStyle(.plain)
+            .contextMenu {
+                Button { editingList = list } label: {
+                    Label("Edit Project", systemImage: "pencil")
+                }
+                Button(role: .destructive) { modelContext.delete(list) } label: {
+                    Label("Delete Project", systemImage: "trash")
+                }
+            }
+        }
+    }
 
     var body: some View {
         NavigationStack {
@@ -88,20 +124,7 @@ struct ListsView: View {
                 } else {
                     LazyVGrid(columns: columns, spacing: 12) {
                         ForEach(lists) { list in
-                            NavigationLink(destination: DashListView(list: list)) {
-                                ProjectTile(list: list)
-                            }
-                            .buttonStyle(.plain)
-                            .contextMenu {
-                                Button { editingList = list } label: {
-                                    Label("Edit Project", systemImage: "pencil")
-                                }
-                                Button(role: .destructive) {
-                                    modelContext.delete(list)
-                                } label: {
-                                    Label("Delete Project", systemImage: "trash")
-                                }
-                            }
+                            tileView(for: list)
                         }
                     }
                     .padding(16)
