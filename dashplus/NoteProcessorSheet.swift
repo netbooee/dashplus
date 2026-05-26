@@ -220,6 +220,9 @@ struct NoteProcessorSheet: View {
                 ForEach($extractedItems) { $item in
                     ExtractedItemRow(item: $item, lists: lists)
                 }
+                .onDelete { offsets in
+                    extractedItems.remove(atOffsets: offsets)
+                }
             }
             .listStyle(.insetGrouped)
             .scrollContentBackground(.hidden)
@@ -330,17 +333,24 @@ private struct ExtractedItemRow: View {
         lists.first(where: { $0.id == item.selectedListID })
     }
 
+    private var projectLabel: String {
+        guard let list = selectedList else { return "GEN" }
+        return list.prefix.isEmpty ? String(list.name.prefix(4)) : list.prefix
+    }
+
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
+        HStack(alignment: .center, spacing: 12) {
+
+            // Include toggle
             Button { item.isIncluded.toggle() } label: {
                 Image(systemName: item.isIncluded ? "checkmark.circle.fill" : "circle")
                     .font(.system(size: 22))
                     .foregroundStyle(item.isIncluded ? Color.appAccent : Color(.systemGray4))
             }
             .buttonStyle(.plain)
-            .padding(.top, 1)
 
-            VStack(alignment: .leading, spacing: 6) {
+            // Symbol + text + dates
+            VStack(alignment: .leading, spacing: 5) {
                 HStack(spacing: 6) {
                     Image(systemName: item.symbol.systemImageName)
                         .font(.system(size: 13, weight: .semibold))
@@ -349,51 +359,55 @@ private struct ExtractedItemRow: View {
                         .font(.system(.subheadline, design: .monospaced))
                 }
 
-                // Project picker
-                Menu {
-                    ForEach(lists) { list in
-                        Button {
-                            item.selectedListID = list.id
-                        } label: {
-                            if list.id == item.selectedListID {
-                                Label(list.name, systemImage: "checkmark")
-                            } else {
-                                Text(list.name)
-                            }
+                if item.startDate != nil || item.dueDate != nil {
+                    HStack(spacing: 10) {
+                        if let start = item.startDate {
+                            Label(start.formatted(date: .abbreviated, time: .omitted),
+                                  systemImage: "calendar")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
                         }
-                    }
-                } label: {
-                    HStack(spacing: 4) {
-                        Image(systemName: "folder")
-                            .font(.system(size: 10, weight: .medium))
-                        Text(selectedList.map { $0.prefix.isEmpty ? $0.name : $0.prefix } ?? "No Project")
-                            .font(.system(.caption, design: .monospaced, weight: .semibold))
-                    }
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(Color.appAccent.opacity(0.1))
-                    .foregroundStyle(Color.appAccent)
-                    .clipShape(Capsule())
-                }
-                .buttonStyle(.plain)
-
-                HStack(spacing: 10) {
-                    if let start = item.startDate {
-                        Label(start.formatted(date: .abbreviated, time: .omitted),
-                              systemImage: "calendar")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                    if let due = item.dueDate {
-                        Label(due.formatted(date: .abbreviated, time: .omitted),
-                              systemImage: "calendar.badge.exclamationmark")
-                            .font(.caption)
-                            .foregroundStyle(.orange)
+                        if let due = item.dueDate {
+                            Label(due.formatted(date: .abbreviated, time: .omitted),
+                                  systemImage: "calendar.badge.exclamationmark")
+                                .font(.caption)
+                                .foregroundStyle(.orange)
+                        }
                     }
                 }
             }
+
+            Spacer(minLength: 0)
+
+            // Project picker — large touch target on the right
+            Menu {
+                ForEach(lists) { list in
+                    Button {
+                        item.selectedListID = list.id
+                    } label: {
+                        if list.id == item.selectedListID {
+                            Label(list.name, systemImage: "checkmark")
+                        } else {
+                            Text(list.name)
+                        }
+                    }
+                }
+            } label: {
+                VStack(spacing: 3) {
+                    Image(systemName: "folder.fill")
+                        .font(.system(size: 18, weight: .medium))
+                    Text(projectLabel)
+                        .font(.system(size: 10, weight: .bold, design: .monospaced))
+                        .lineLimit(1)
+                }
+                .foregroundStyle(Color.appAccent)
+                .frame(width: 54, height: 48)
+                .background(Color.appAccent.opacity(0.12))
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+            }
+            .buttonStyle(.plain)
         }
-        .padding(.vertical, 2)
+        .padding(.vertical, 4)
         .opacity(item.isIncluded ? 1 : 0.35)
     }
 }
@@ -433,7 +447,30 @@ struct APIKeySheet: View {
                 } header: {
                     Text("Anthropic API Key")
                 } footer: {
-                    Text("Tap the eye to reveal the field, then long-press to paste. Stored locally on this device only.")
+                    Text("Tap the eye icon, then long-press the field to paste. Your key is stored locally on this device only.")
+                }
+
+                Section {
+                    Link(destination: URL(string: "https://console.anthropic.com")!) {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text("Get a free API key")
+                                    .font(.subheadline.weight(.medium))
+                                    .foregroundStyle(Color.appAccent)
+                                Text("console.anthropic.com → Sign up → API Keys")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            Image(systemName: "arrow.up.right")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(Color.appAccent)
+                        }
+                    }
+                } header: {
+                    Text("Don't have a key?")
+                } footer: {
+                    Text("Anthropic offers free credits to new accounts — enough to process hundreds of notes.")
                 }
             }
             .navigationTitle("API Key")

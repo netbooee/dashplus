@@ -89,8 +89,21 @@ struct ListsView: View {
                     }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button { showingImporter = true } label: {
-                        Image(systemName: "square.and.arrow.down")
+                    Menu {
+                        ShareLink(
+                            item: DashPlusExporter.writeAllToTemp(lists: lists),
+                            preview: SharePreview(
+                                DashPlusExporter.exportAllFileName(),
+                                icon: Image(systemName: "doc.text")
+                            )
+                        ) {
+                            Label("Export All Projects", systemImage: "square.and.arrow.up.on.square")
+                        }
+                        Button { showingImporter = true } label: {
+                            Label("Import Projects", systemImage: "square.and.arrow.down")
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
                     }
                 }
             }
@@ -126,7 +139,11 @@ struct ListsView: View {
             defer { url.stopAccessingSecurityScopedResource() }
             do {
                 let text = try String(contentsOf: url, encoding: .utf8)
-                DashPlusExporter.importAsNewList(from: text, context: modelContext)
+                if DashPlusExporter.isFullBackup(text) {
+                    DashPlusExporter.importAll(from: text, context: modelContext)
+                } else {
+                    DashPlusExporter.importAsNewList(from: text, context: modelContext)
+                }
             } catch {
                 importError = error.localizedDescription
             }

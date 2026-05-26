@@ -28,15 +28,18 @@ struct SymbolSelection {
 
 struct SymbolPickerSheet: View {
     @Environment(\.dismiss) private var dismiss
+    @Query(sort: \DashList.prefix) private var allLists: [DashList]
+
     let onConfirm: (SymbolSelection) -> Void
     let onMoveToList: ((DashList) -> Void)?
     let currentListID: UUID?
 
     @State private var selection: SymbolSelection
+    @State private var localListID: UUID?
     @State private var showingListPicker = false
     @FocusState private var extraFieldFocused: Bool
 
-    private let columns = [GridItem(.adaptive(minimum: 80), spacing: 12)]
+    private let columns = [GridItem(.adaptive(minimum: 60), spacing: 8)]
 
     init(
         current: SymbolSelection,
@@ -45,6 +48,7 @@ struct SymbolPickerSheet: View {
         onConfirm: @escaping (SymbolSelection) -> Void
     ) {
         _selection = State(initialValue: current)
+        _localListID = State(initialValue: currentListID)
         self.currentListID = currentListID
         self.onMoveToList = onMoveToList
         self.onConfirm = onConfirm
@@ -64,10 +68,10 @@ struct SymbolPickerSheet: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 20) {
+                VStack(spacing: 14) {
 
                     // Symbol grid
-                    LazyVGrid(columns: columns, spacing: 12) {
+                    LazyVGrid(columns: columns, spacing: 8) {
                         ForEach(ItemSymbol.allCases, id: \.self) { symbol in
                             Button {
                                 if symbol == .circle && onMoveToList != nil {
@@ -81,32 +85,37 @@ struct SymbolPickerSheet: View {
                                     dismiss()
                                 }
                             } label: {
-                                VStack(spacing: 8) {
+                                VStack(spacing: 4) {
                                     Image(systemName: symbol.systemImageName)
-                                        .font(.system(size: 26, weight: .medium))
+                                        .font(.system(size: 18, weight: .medium))
                                         .foregroundStyle(symbol.color)
-                                        .frame(width: 54, height: 54)
+                                        .frame(width: 40, height: 40)
                                         .background(symbol.color.opacity(0.12))
-                                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                                        .clipShape(RoundedRectangle(cornerRadius: 10))
                                         .overlay(
-                                            RoundedRectangle(cornerRadius: 12)
+                                            RoundedRectangle(cornerRadius: 10)
                                                 .stroke(
                                                     selection.symbol == symbol ? symbol.color : .clear,
                                                     lineWidth: 2
                                                 )
                                         )
                                     Text(symbol.label)
-                                        .font(.caption2)
+                                        .font(.system(size: 9, weight: .regular))
                                         .foregroundStyle(.primary)
                                         .multilineTextAlignment(.center)
                                         .lineLimit(2)
-                                        .frame(width: 70)
+                                        .frame(width: 56)
                                 }
                             }
                             .buttonStyle(.plain)
                         }
                     }
                     .padding(.horizontal)
+
+                    // Project picker (only shown when onMoveToList is wired up)
+                    if onMoveToList != nil {
+                        projectPickerRow
+                    }
 
                     // Conditional extra fields
                     switch selection.symbol {
@@ -129,19 +138,26 @@ struct SymbolPickerSheet: View {
                             dateRows()
                         }
                     case .scheduledMeeting:
-                        VStack(alignment: .leading, spacing: 6) {
-                            Label("Meeting Date", systemImage: "calendar")
-                                .font(.subheadline.weight(.medium))
+                        HStack(spacing: 12) {
+                            Image(systemName: "calendar")
                                 .foregroundStyle(.secondary)
-                                .padding(.horizontal)
+                                .frame(width: 20)
+                            Text("Meeting Date")
+                                .font(.subheadline)
+                                .foregroundStyle(.primary)
+                            Spacer()
                             DatePicker(
                                 "",
                                 selection: $selection.scheduledDate,
                                 displayedComponents: [.date]
                             )
-                            .datePickerStyle(.graphical)
-                            .padding(.horizontal)
+                            .labelsHidden()
+                            .datePickerStyle(.compact)
                         }
+                        .padding(14)
+                        .background(Color(.secondarySystemBackground))
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .padding(.horizontal)
                     default:
                         if supportsScheduling(selection.symbol) {
                             dateRows()
@@ -175,6 +191,65 @@ struct SymbolPickerSheet: View {
         }
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)
+    }
+
+    // MARK: - Project picker
+
+    private var sortedLists: [DashList] {
+        let gen  = allLists.filter { $0.prefix == "GEN" }
+        let rest = allLists.filter { $0.prefix != "GEN" }.sorted { $0.prefix < $1.prefix }
+        return gen + rest
+    }
+
+    private var currentListLabel: String {
+        if let list = allLists.first(where: { $0.id == localListID }) {
+            return list.prefix.isEmpty ? list.name : list.prefix
+        }
+        return "Project"
+    }
+
+    @ViewBuilder
+    private var projectPickerRow: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "folder")
+                .foregroundStyle(.secondary)
+                .frame(width: 20)
+            Text("Project")
+                .font(.subheadline)
+                .foregroundStyle(.primary)
+            Spacer()
+            Menu {
+                ForEach(sortedLists) { list in
+                    Button {
+                        localListID = list.id
+                        onMoveToList?(list)
+                    } label: {
+                        if list.id == localListID {
+                            Label(list.name, systemImage: "checkmark")
+                        } else {
+                            Text(list.name)
+                        }
+                    }
+                }
+            } label: {
+                HStack(spacing: 4) {
+                    Text(currentListLabel)
+                        .font(.system(.subheadline, design: .monospaced, weight: .semibold))
+                    Image(systemName: "chevron.up.chevron.down")
+                        .font(.system(size: 10, weight: .medium))
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(Color.appAccent.opacity(0.12))
+                .foregroundStyle(Color.appAccent)
+                .clipShape(Capsule())
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(14)
+        .background(Color(.secondarySystemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .padding(.horizontal)
     }
 
     // MARK: - Date helpers

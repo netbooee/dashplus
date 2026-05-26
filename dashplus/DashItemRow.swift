@@ -1,4 +1,5 @@
 import SwiftUI
+import AudioToolbox
 
 struct DashItemRow: View {
     @Bindable var item: DashItem
@@ -98,6 +99,10 @@ struct DashItemRow: View {
                 onMoveToList: { list in item.list = list }
             ) { result in
                 let wasLeftArrow = item.symbol == .leftArrow
+                if result.symbol == .plus && item.symbol != .plus {
+                    UINotificationFeedbackGenerator().notificationOccurred(.success)
+                    AudioServicesPlaySystemSound(1322)
+                }
                 item.symbol     = result.symbol
                 item.assignedTo = result.assignedTo
                 item.waitingFor = result.waitingFor

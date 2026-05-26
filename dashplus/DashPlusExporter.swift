@@ -52,6 +52,85 @@ struct DashPlusExporter {
         return url
     }
 
+    // MARK: - Full backup export
+
+    static func exportAllText(lists: [DashList]) -> String {
+        let dateStr = ISO8601DateFormatter().string(from: Date()).prefix(10)
+        var lines = [
+            "# HappensNext Backup",
+            "# Exported: \(dateStr)",
+            "# Projects: \(lists.count)",
+        ]
+
+        let sorted = lists.sorted {
+            if $0.prefix == "GEN" { return true }
+            if $1.prefix == "GEN" { return false }
+            return $0.prefix < $1.prefix
+        }
+
+        for list in sorted {
+            lines.append("")
+            lines.append("## List: \(list.name) (\(list.prefix))")
+            let items = list.itemList.sorted {
+                $0.sortOrder == $1.sortOrder ? $0.createdAt < $1.createdAt : $0.sortOrder < $1.sortOrder
+            }
+            for item in items {
+                let prefix = item.categoryCode.isEmpty ? list.prefix : item.categoryCode
+                let base = prefix.isEmpty ? item.text : "\(prefix): \(item.text)"
+                var line = "\(item.symbol.exportSymbol) \(base)"
+                if item.symbol == .leftArrow, !item.assignedTo.isEmpty { line += "  @\(item.assignedTo)" }
+                if item.symbol == .rightArrow, !item.waitingFor.isEmpty { line += "  ->\(item.waitingFor)" }
+                if item.symbol == .scheduledMeeting { line += "  date:\(isoDate(item.scheduledDate))" }
+                lines.append(line)
+            }
+        }
+
+        return lines.joined(separator: "\n")
+    }
+
+    static func exportAllFileName() -> String {
+        let f = DateFormatter()
+        f.dateFormat = "yyyy-MM-dd"
+        return "HappensNext_backup_\(f.string(from: Date())).txt"
+    }
+
+    static func writeAllToTemp(lists: [DashList]) -> URL {
+        let text = exportAllText(lists: lists)
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent(exportAllFileName())
+        try? text.write(to: url, atomically: true, encoding: .utf8)
+        return url
+    }
+
+    // MARK: - Full backup import
+
+    /// Imports a full backup file, creating a new list for each section.
+    static func importAll(from text: String, context: ModelContext) {
+        // Split into per-list chunks on "## List:" lines
+        var chunks: [String] = []
+        var current: [String] = []
+
+        for line in text.components(separatedBy: .newlines) {
+            if line.hasPrefix("## List:") {
+                if !current.isEmpty { chunks.append(current.joined(separator: "\n")) }
+                // Convert "## List:" → "# List:" so existing parser handles it
+                current = ["# List:" + line.dropFirst("## List:".count)]
+            } else {
+                current.append(line)
+            }
+        }
+        if !current.isEmpty { chunks.append(current.joined(separator: "\n")) }
+
+        for chunk in chunks where !chunk.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            importAsNewList(from: chunk, context: context)
+        }
+    }
+
+    /// Returns true if the text looks like a full backup (multi-list) file.
+    static func isFullBackup(_ text: String) -> Bool {
+        text.contains("## List:")
+    }
+
     // MARK: - Import
 
     /// Append parsed items to an existing list.

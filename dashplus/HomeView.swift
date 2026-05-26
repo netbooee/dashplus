@@ -30,6 +30,8 @@ fileprivate enum HomeDayRow: Identifiable {
 
 fileprivate struct HomeDayRowView: View {
     let row: HomeDayRow
+    @Environment(\.modelContext) private var modelContext
+
     var body: some View {
         switch row {
         case .groupHeader(let title, let symbol, let count, _):
@@ -54,6 +56,20 @@ fileprivate struct HomeDayRowView: View {
 
         case .dashItem(let item, let isOverdue):
             DashItemRow(item: item, isOverdue: isOverdue)
+                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                    Button(role: .destructive) {
+                        modelContext.delete(item)
+                    } label: {
+                        Label("Delete", systemImage: "trash")
+                    }
+                }
+                .contextMenu {
+                    Button(role: .destructive) {
+                        modelContext.delete(item)
+                    } label: {
+                        Label("Delete", systemImage: "trash")
+                    }
+                }
         }
     }
 }
