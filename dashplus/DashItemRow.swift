@@ -101,7 +101,12 @@ struct DashItemRow: View {
                 let wasLeftArrow = item.symbol == .leftArrow
                 if result.symbol == .plus && item.symbol != .plus {
                     UINotificationFeedbackGenerator().notificationOccurred(.success)
-                    AudioServicesPlaySystemSound(1322)
+                    // Sound 1322 ("sent mail" chime) works on iPhone.
+                    // On an iPhone app running on an Apple Silicon Mac the ID
+                    // doesn't map correctly, so fall back to the system "Tock"
+                    // (ID 1103) which plays reliably on both platforms.
+                    let chime: SystemSoundID = ProcessInfo.processInfo.isiOSAppOnMac ? 1103 : 1322
+                    AudioServicesPlaySystemSound(chime)
                 }
                 item.symbol     = result.symbol
                 item.assignedTo = result.assignedTo
