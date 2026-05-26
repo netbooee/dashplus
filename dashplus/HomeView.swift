@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import TipKit
 
 // MARK: - App palette
 
@@ -85,6 +86,8 @@ struct HomeView: View {
     @State private var showingSettings = false
     @State private var collapsedSections: Set<Date> = []
 
+    private let deleteItemTip = DeleteItemTip()
+
     // MARK: Symbol groups (order matters)
 
     private static let symbolGroups: [(title: String, symbols: [ItemSymbol])] = [
@@ -143,6 +146,29 @@ struct HomeView: View {
         return rows
     }
 
+    // MARK: Tip helpers
+
+    /// ID of the first dashItem row across all day sections — used to anchor the delete tip.
+    private var firstDashItemID: String? {
+        for day in groupedDays {
+            for row in day.rows {
+                if case .dashItem = row { return row.id }
+            }
+        }
+        return nil
+    }
+
+    /// Wraps HomeDayRowView and attaches the delete tip only to the first dashItem row.
+    @ViewBuilder
+    private func itemRowView(row: HomeDayRow) -> some View {
+        if row.id == firstDashItemID {
+            HomeDayRowView(row: row)
+                .popoverTip(deleteItemTip, arrowEdge: .bottom)
+        } else {
+            HomeDayRowView(row: row)
+        }
+    }
+
     // MARK: Formatters
 
     private static let fullDateFormatter: DateFormatter = {
@@ -171,7 +197,7 @@ struct HomeView: View {
                                     .listRowInsets(EdgeInsets(top: 10, leading: 16, bottom: 10, trailing: 16))
                             } else {
                                 ForEach(day.rows) { row in
-                                    HomeDayRowView(row: row)
+                                    itemRowView(row: row)
                                 }
                             }
                         }
