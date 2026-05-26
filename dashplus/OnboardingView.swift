@@ -251,6 +251,20 @@ private struct GetStartedPage: View {
                     .multilineTextAlignment(.center)
             }
 
+            // Sample project note
+            HStack(alignment: .top, spacing: 10) {
+                Image(systemName: "lightbulb.fill")
+                    .font(.subheadline)
+                    .foregroundStyle(Color.appAccent)
+                Text("We've added a sample **Trip Planning** project so you can explore every symbol type. Long-press it in Projects and tap Delete when you're done with it.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.leading)
+            }
+            .padding(14)
+            .background(Color.appAccent.opacity(0.08))
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+
             Spacer()
 
             Button(action: onDismiss) {
