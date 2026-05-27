@@ -370,6 +370,7 @@
 				DEVELOPMENT_TEAM = GB8H6683BF;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = HappensNext;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "HappensNext uses your microphone to transcribe spoken notes into tasks.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "HappensNext uses speech recognition to convert your voice into text for task creation.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -400,6 +401,7 @@
 				DEVELOPMENT_TEAM = GB8H6683BF;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = HappensNext;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "HappensNext uses your microphone to transcribe spoken notes into tasks.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "HappensNext uses speech recognition to convert your voice into text for task creation.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
