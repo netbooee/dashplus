@@ -15,7 +15,7 @@ struct DashPlusApp: App {
             let config = ModelConfiguration(
                 schema: schema,
                 isStoredInMemoryOnly: false,
-                cloudKitDatabase: .automatic
+                cloudKitDatabase: .private("iCloud.com.tonymartinez.dashplus")
             )
             container = try ModelContainer(for: schema, configurations: config)
         } catch {
