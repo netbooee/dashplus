@@ -352,9 +352,30 @@ private struct ExtractedItemRow: View {
             // Symbol + text + dates
             VStack(alignment: .leading, spacing: 5) {
                 HStack(spacing: 6) {
-                    Image(systemName: item.symbol.systemImageName)
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(item.symbol.color)
+                    // Symbol picker — tap to change type
+                    Menu {
+                        ForEach(ItemSymbol.reviewCases, id: \.self) { symbol in
+                            Button {
+                                item.symbol = symbol
+                            } label: {
+                                if symbol == item.symbol {
+                                    Label(symbol.label, systemImage: symbol.systemImageName)
+                                        .labelStyle(.titleAndIcon)
+                                } else {
+                                    Label(symbol.label, systemImage: symbol.systemImageName)
+                                }
+                            }
+                        }
+                    } label: {
+                        Image(systemName: item.symbol.systemImageName)
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundStyle(item.symbol.color)
+                            .frame(width: 28, height: 28)
+                            .background(item.symbol.color.opacity(0.12))
+                            .clipShape(RoundedRectangle(cornerRadius: 7))
+                    }
+                    .buttonStyle(.plain)
+
                     TextField("Item text", text: $item.text)
                         .font(.system(.subheadline, design: .monospaced))
                 }

@@ -73,6 +73,11 @@ enum ItemSymbol: String, CaseIterable, Codable {
         }
     }
 
+    /// Symbols available in the AI review screen (excludes Complete and Move to List).
+    static let reviewCases: [ItemSymbol] = [
+        .dash, .rightArrow, .leftArrow, .square, .scheduledMeeting, .triangle, .person, .someday
+    ]
+
     /// True for symbols that support optional start / due date scheduling.
     var supportsDateScheduling: Bool {
         switch self {
