@@ -7,18 +7,40 @@ struct InlineAddItemRow: View {
     @Bindable var list: DashList
 
     @State private var text = ""
+    @State private var symbol: ItemSymbol = .dash
     @FocusState var isFocused: Bool
 
     var body: some View {
         if editMode?.wrappedValue.isEditing != true {
             HStack(alignment: .top, spacing: 12) {
-                Image(systemName: "minus")
-                    .foregroundStyle(.quaternary)
-                    .font(.system(size: 16, weight: .semibold))
-                    .frame(width: 24, height: 24)
-                    .padding(.top, 1)
 
-                TextField("What happens next?", text: $text)
+                // Symbol picker — persists between submissions
+                Menu {
+                    ForEach(ItemSymbol.reviewCases, id: \.self) { s in
+                        Button {
+                            symbol = s
+                            // Return focus to the text field after selection
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                                isFocused = true
+                            }
+                        } label: {
+                            if s == symbol {
+                                Label(s.label, systemImage: s.systemImageName)
+                            } else {
+                                Label(s.label, systemImage: s.systemImageName)
+                            }
+                        }
+                    }
+                } label: {
+                    Image(systemName: symbol.systemImageName)
+                        .foregroundStyle(symbol == .dash ? AnyShapeStyle(.quaternary) : AnyShapeStyle(symbol.color))
+                        .font(.system(size: 16, weight: .semibold))
+                        .frame(width: 24, height: 24)
+                }
+                .buttonStyle(.plain)
+                .padding(.top, 1)
+
+                TextField(symbol.inlinePlaceholder, text: $text)
                     .font(.system(.subheadline, design: .monospaced))
                     .foregroundStyle(.primary)
                     .focused($isFocused)
@@ -36,7 +58,7 @@ struct InlineAddItemRow: View {
             return
         }
         let item = DashItem(
-            symbol: .dash,
+            symbol: symbol,
             categoryCode: list.prefix,
             text: trimmed,
             sortOrder: list.itemList.count
@@ -44,6 +66,7 @@ struct InlineAddItemRow: View {
         item.list = list
         modelContext.insert(item)
         text = ""
+        // Keep focus and symbol so the user can keep entering the same type
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
             isFocused = true
         }

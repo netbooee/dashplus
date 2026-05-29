@@ -78,6 +78,21 @@ enum ItemSymbol: String, CaseIterable, Codable {
         .dash, .rightArrow, .leftArrow, .square, .scheduledMeeting, .triangle, .person, .someday
     ]
 
+    /// Placeholder text for the inline add row, adapts to the selected symbol.
+    var inlinePlaceholder: String {
+        switch self {
+        case .dash:             return "What happens next?"
+        case .triangle:         return "Add a note…"
+        case .rightArrow:       return "Waiting for…"
+        case .leftArrow:        return "Delegate to…"
+        case .square:           return "Meeting to schedule…"
+        case .scheduledMeeting: return "Scheduled meeting…"
+        case .person:           return "Add a contact…"
+        case .someday:          return "Someday / maybe…"
+        default:                return "What happens next?"
+        }
+    }
+
     /// True for symbols that support optional start / due date scheduling.
     var supportsDateScheduling: Bool {
         switch self {
