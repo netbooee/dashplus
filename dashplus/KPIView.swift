@@ -57,11 +57,22 @@ struct KPIDetailView: View {
         )
     }
 
-    /// Groups items by project name, sorted alphabetically — used for the Completed view.
+    /// Groups items by project name, sorted alphabetically.
     private var groupedByProject: [(name: String, items: [DashItem])] {
         let grouped = Dictionary(grouping: items) { $0.list?.name ?? "No Project" }
         return grouped.sorted { $0.key < $1.key }.map { (name: $0.key, items: $0.value) }
     }
+
+    /// Groups delegated items by the person they were assigned to.
+    private var groupedByDelegatee: [(name: String, items: [DashItem])] {
+        let grouped = Dictionary(grouping: items) {
+            $0.assignedTo.trimmingCharacters(in: .whitespaces).isEmpty ? "Unassigned" : $0.assignedTo
+        }
+        return grouped.sorted { $0.key < $1.key }.map { (name: $0.key, items: $0.value) }
+    }
+
+    /// Symbols whose detail view groups by project.
+    private static let projectGroupedSymbols: Set<ItemSymbol> = [.plus, .dash, .square, .scheduledMeeting]
 
     var body: some View {
         List {
@@ -69,11 +80,19 @@ struct KPIDetailView: View {
                 Text("No items")
                     .foregroundStyle(.tertiary)
                     .listRowBackground(Color.clear)
-            } else if symbol == .plus {
+            } else if Self.projectGroupedSymbols.contains(symbol) {
                 ForEach(groupedByProject, id: \.name) { group in
                     Section(group.name) {
                         ForEach(group.items) { item in
                             DashItemRow(item: item, showPrefix: false)
+                        }
+                    }
+                }
+            } else if symbol == .leftArrow {
+                ForEach(groupedByDelegatee, id: \.name) { group in
+                    Section(group.name) {
+                        ForEach(group.items) { item in
+                            DashItemRow(item: item, showDate: true)
                         }
                     }
                 }
