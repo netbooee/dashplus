@@ -5,8 +5,18 @@ import TipKit
 // MARK: - App palette
 
 extension Color {
-    static let appAccent = Color(red: 0.76, green: 0.34, blue: 0.20) // terracotta
-    static let warmBg    = Color(red: 0.96, green: 0.93, blue: 0.89) // cream
+    /// Terracotta accent — slightly brighter in dark mode for contrast.
+    static let appAccent = Color(UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(red: 0.87, green: 0.52, blue: 0.32, alpha: 1) // lighter terracotta
+            : UIColor(red: 0.76, green: 0.34, blue: 0.20, alpha: 1) // original terracotta
+    })
+    /// Warm cream in light mode; standard iOS grouped background in dark mode.
+    static let warmBg = Color(UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? .systemGroupedBackground
+            : UIColor(red: 0.96, green: 0.93, blue: 0.89, alpha: 1)
+    })
 }
 
 // MARK: - Supporting types
