@@ -29,7 +29,7 @@ enum ItemSymbol: String, CaseIterable, Codable {
 
     var color: Color {
         switch self {
-        case .dash:             return .secondary
+        case .dash:             return .appAccent
         case .plus:             return .green
         case .rightArrow:       return .orange
         case .leftArrow:        return .blue
