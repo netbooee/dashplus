@@ -18,8 +18,15 @@ struct DashPlusApp: App {
                 cloudKitDatabase: .private("iCloud.com.tonymartinez.dashplus")
             )
             container = try ModelContainer(for: schema, configurations: config)
+            UserDefaults.standard.set("✅ Active", forKey: "happensnext.cloudKitStatus")
+            UserDefaults.standard.removeObject(forKey: "happensnext.cloudKitError")
+            print("✅ HappensNext: CloudKit container initialised successfully")
         } catch {
-            // Fallback to local-only if CloudKit is unavailable (e.g. no iCloud account)
+            let msg = error.localizedDescription
+            UserDefaults.standard.set("❌ Failed", forKey: "happensnext.cloudKitStatus")
+            UserDefaults.standard.set(msg, forKey: "happensnext.cloudKitError")
+            print("❌ HappensNext: CloudKit init failed — \(error)")
+            // Fallback to local-only
             let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
             container = try! ModelContainer(for: schema, configurations: config)
         }

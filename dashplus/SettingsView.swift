@@ -163,8 +163,19 @@ struct SettingsView: View {
                     HStack {
                         Text("Version")
                         Spacer()
-                        Text("1.0")
+                        Text("1.0.1")
                             .foregroundStyle(.secondary)
+                    }
+                    HStack {
+                        Text("iCloud Sync")
+                        Spacer()
+                        Text(UserDefaults.standard.string(forKey: "happensnext.cloudKitStatus") ?? "Unknown")
+                            .foregroundStyle(.secondary)
+                    }
+                    if let error = UserDefaults.standard.string(forKey: "happensnext.cloudKitError") {
+                        Text(error)
+                            .font(.caption)
+                            .foregroundStyle(.red)
                     }
                 }
             }
