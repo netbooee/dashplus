@@ -72,7 +72,9 @@ struct KPIDetailView: View {
     }
 
     /// Symbols whose detail view groups by project.
-    private static let projectGroupedSymbols: Set<ItemSymbol> = [.plus, .dash, .square, .scheduledMeeting]
+    private static let projectGroupedSymbols: Set<ItemSymbol> = [
+        .plus, .dash, .square, .scheduledMeeting, .rightArrow, .triangle, .person, .someday
+    ]
 
     var body: some View {
         List {
