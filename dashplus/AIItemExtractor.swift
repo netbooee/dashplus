@@ -51,7 +51,7 @@ struct AIItemExtractor {
         let today = ISO8601DateFormatter().string(from: Calendar.current.startOfDay(for: Date()))
 
         let system = """
-        You extract actionable items from free-form notes for a Dash/Plus symbol-based task app.
+        You extract actionable items from free-form notes for HappensNext, a symbol-based task app.
 
         Available symbol types:
         - dash             → to-do / next action
@@ -65,10 +65,12 @@ struct AIItemExtractor {
 
         Today is \(today). Resolve relative dates ("tomorrow", "next Friday", "in two weeks") to ISO 8601 date strings (YYYY-MM-DD).
 
+        IMPORTANT: For the "text" field, copy the user's exact words from the note. Do NOT rephrase, rewrite, summarize, or add any words. Preserve the user's phrasing verbatim.
+
         Return ONLY a valid JSON array — no markdown fences, no explanation. Each object:
         {
           "symbol": "<type>",
-          "text": "<concise item description>",
+          "text": "<user's exact words from the note, verbatim — do not rephrase>",
           "projectHint": "<project name if clearly mentioned, null otherwise>",
           "startDate": "<YYYY-MM-DD or null>",
           "dueDate": "<YYYY-MM-DD or null>",
