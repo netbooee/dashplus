@@ -41,26 +41,35 @@ fileprivate enum HomeDayRow: Identifiable {
 
 fileprivate struct HomeDayRowView: View {
     let row: HomeDayRow
+    var isCollapsed: Bool = false
+    var onToggle: (() -> Void)? = nil
     @Environment(\.modelContext) private var modelContext
 
     var body: some View {
         switch row {
         case .groupHeader(let title, let symbol, let count, _):
-            HStack(spacing: 8) {
-                Image(systemName: symbol.systemImageName)
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundStyle(symbol.color)
-                    .frame(width: 16)
-                Text(title)
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(symbol.color)
-                    .textCase(.uppercase)
-                Spacer()
-                Text("\(count)")
-                    .font(.caption.weight(.medium))
-                    .foregroundStyle(symbol.color)
-                    .monospacedDigit()
+            Button { onToggle?() } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: symbol.systemImageName)
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(symbol.color)
+                        .frame(width: 16)
+                    Text(title)
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(symbol.color)
+                        .textCase(.uppercase)
+                    Spacer()
+                    Text(isCollapsed ? "\(count) hidden" : "\(count)")
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(symbol.color)
+                        .monospacedDigit()
+                    Image(systemName: isCollapsed ? "chevron.right" : "chevron.down")
+                        .font(.system(size: 9, weight: .bold))
+                        .foregroundStyle(symbol.color.opacity(0.7))
+                }
+                .contentShape(Rectangle())
             }
+            .buttonStyle(.plain)
             .listRowSeparator(.hidden)
             .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
             .listRowBackground(symbol.color.opacity(0.12))
@@ -95,6 +104,9 @@ struct HomeView: View {
     @State private var showingNoteProcessor = false
     @State private var showingSettings = false
     @State private var collapsedSections: Set<Date> = []
+    /// Group UIDs that are expanded. Anything not in this set is collapsed.
+    @State private var expandedGroups: Set<String> = []
+    @State private var hasInitializedGroups = false
 
     private let deleteItemTip = DeleteItemTip()
 
@@ -158,20 +170,26 @@ struct HomeView: View {
 
     // MARK: Tip helpers
 
-    /// ID of the first dashItem row across all day sections — used to anchor the delete tip.
+    /// ID of the first visible dashItem row — used to anchor the delete tip.
     private var firstDashItemID: String? {
         for day in groupedDays {
-            for row in day.rows {
+            for row in visibleRows(for: day) {
                 if case .dashItem = row { return row.id }
             }
         }
         return nil
     }
 
-    /// Wraps HomeDayRowView and attaches the delete tip only to the first dashItem row.
+    /// Wraps HomeDayRowView, passing collapse state for headers and anchoring the tip.
     @ViewBuilder
     private func itemRowView(row: HomeDayRow) -> some View {
-        if row.id == firstDashItemID {
+        if case .groupHeader(_, _, _, let uid) = row {
+            HomeDayRowView(
+                row: row,
+                isCollapsed: !expandedGroups.contains(uid),
+                onToggle: { toggleGroup(uid) }
+            )
+        } else if row.id == firstDashItemID {
             HomeDayRowView(row: row)
                 .popoverTip(deleteItemTip, arrowEdge: .bottom)
         } else {
@@ -206,7 +224,7 @@ struct HomeView: View {
                                     .foregroundStyle(.tertiary)
                                     .listRowInsets(EdgeInsets(top: 10, leading: 16, bottom: 10, trailing: 16))
                             } else {
-                                ForEach(day.rows) { row in
+                                ForEach(visibleRows(for: day)) { row in
                                     itemRowView(row: row)
                                 }
                             }
@@ -267,7 +285,10 @@ struct HomeView: View {
             .sheet(isPresented: $showingSettings) {
                 SettingsView()
             }
-            .task { ensureGENExists() }
+            .task {
+                ensureGENExists()
+                initExpandedGroups()
+            }
         }
     }
 
@@ -344,6 +365,43 @@ struct HomeView: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 6)
         }
+    }
+
+    // MARK: Group collapse helpers
+
+    /// Called once per session — pre-expands only today's To Do group.
+    private func initExpandedGroups() {
+        guard !hasInitializedGroups else { return }
+        hasInitializedGroups = true
+        let ts = Int(todayStart.timeIntervalSince1970)
+        expandedGroups.insert("\(ts)-To Do")
+    }
+
+    private func toggleGroup(_ uid: String) {
+        withAnimation(.easeInOut(duration: 0.2)) {
+            if expandedGroups.contains(uid) {
+                expandedGroups.remove(uid)
+            } else {
+                expandedGroups.insert(uid)
+            }
+        }
+    }
+
+    /// Returns only the rows that should be visible given the current expanded state.
+    /// Group headers are always included; their items are hidden when the group is collapsed.
+    private func visibleRows(for day: DaySection) -> [HomeDayRow] {
+        var result: [HomeDayRow] = []
+        var currentGroupExpanded = true
+        for row in day.rows {
+            switch row {
+            case .groupHeader(_, _, _, let uid):
+                currentGroupExpanded = expandedGroups.contains(uid)
+                result.append(row)
+            case .dashItem:
+                if currentGroupExpanded { result.append(row) }
+            }
+        }
+        return result
     }
 
     // MARK: Helpers
